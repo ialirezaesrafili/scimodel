@@ -64,7 +64,7 @@ scimodel/
 └── LICENSE
 ```
 
-The directories currently contain architecture notes and placeholders only. Scientific and application code will be added after the Phase 0 scope brief is approved.
+The architecture boundaries are configured, and the Phase 0 reference datasets, data-inspection workflow, and initial scientific fitting workflow are present. Further capabilities will be added phase by phase while preserving these boundaries.
 
 ## Long-term vision
 
