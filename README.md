@@ -40,6 +40,31 @@ For the detailed execution plan and evidence-based progress tracking, see:
 
 - [End-to-End Project Roadmap](docs/SciModel_End_to_End_Project_Roadmap.md)
 - [Project Status Report](docs/PROJECT_STATUS_REPORT.md)
+- [Architecture Guide](docs/ARCHITECTURE.md)
+- [Development Guide](docs/DEVELOPMENT.md)
+
+## Repository structure
+
+```text
+scimodel/
+├── src/scimodel/
+│   ├── domain/          # Scientific concepts and invariants
+│   ├── application/     # Use cases and ports
+│   ├── adapters/        # External-to-domain translations
+│   ├── infrastructure/  # Filesystem, config, persistence, integrations
+│   └── interfaces/      # CLI and presentation boundaries
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── scientific/
+├── examples/             # Synthetic or redistributable examples only
+├── data/                 # Data policy and local-data boundary
+├── docs/
+├── pyproject.toml
+└── LICENSE
+```
+
+The directories currently contain architecture notes and placeholders only. Scientific and application code will be added after the Phase 0 scope brief is approved.
 
 ## Long-term vision
 

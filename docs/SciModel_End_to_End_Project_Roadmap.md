@@ -63,7 +63,7 @@ This status is deliberately evidence-based: a phase is not marked complete becau
 | Phase | Status | Evidence currently available | Immediate next action |
 |---|---|---|---|
 | 0 — Scope and test case | **In progress** | Product goals and a proposed workflow are documented; domain, dataset, and acceptance criteria are not selected | Select one domain, dataset, reference analysis, and success criteria |
-| 1 — Development foundation | **Not started** | No package metadata, source tree, tests, or CI detected | Create the installable Python skeleton and clean-environment test |
+| 1 — Development foundation | **In progress** | Project metadata, tool configuration, package boundaries, policy files, and test boundaries are initialized; executable modules, tests, and CI are not present | Complete the installable skeleton and clean-environment test after Phase 0 scope approval |
 | 2 — Data inspection | **Not started** | Requirements are described only | Define input/output contracts and implement tested inspection |
 | 3 — Scientific workflow | **Not started** | Model family has not been selected | Choose a baseline model and create known-answer tests |
 | 4 — Validation and reproducibility | **Not started** | Requirements are described only | Define diagnostics, manifest fields, and report format |

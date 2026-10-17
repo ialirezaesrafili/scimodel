@@ -2,13 +2,13 @@
 
 **Review date:** 2026-10-17  
 **Repository state:** Private prototype / documentation baseline  
-**Overall status:** Phase 0 in progress; implementation has not started
+**Overall status:** Phase 0 in progress; Phase 1 structure and configuration initialized
 
 ## 1. Executive status
 
 SciModel has a clear product direction and a detailed end-to-end roadmap. The intended first product is a Python-first command-line workflow that moves from tabular experimental data to data inspection, a justified baseline model, validation, and a reproducible report.
 
-The repository is not yet an executable project. At this review, the only project content available is the README and the roadmap. There is no package configuration, source code, test suite, example dataset, CI workflow, license, or implemented CLI to evaluate.
+The repository is not yet an executable project. The production-oriented configuration and package boundaries are now present, but there is no implementation, test suite, example dataset, CI workflow, or implemented CLI to evaluate.
 
 The most important next step is therefore not adding advanced modeling features. It is selecting one scientific use case and turning it into a testable vertical slice with known expected behavior.
 
@@ -20,14 +20,14 @@ The most important next step is therefore not adding advanced modeling features.
 | Scientific principles | Defined | `README.md` | Transparency, reproducibility, uncertainty, and human review are explicit |
 | MVP direction | Proposed | `docs/SciModel_End_to_End_Project_Roadmap.md` | Narrow enough in principle, but not yet tied to a domain |
 | Phase plan | Documented | Roadmap phases 0–8 | Ready to execute |
-| Python package | Missing | No `pyproject.toml` or `src/` tree | Must be created in Phase 1 |
+| Python package | Structure initialized | `pyproject.toml` and `src/scimodel/` boundaries | Package modules still need to be created in Phase 1 |
 | CLI | Missing | No implementation | Command names remain proposals |
 | Data ingestion | Missing | No source or fixtures | Must be designed around the selected dataset |
 | Scientific model | Missing | No solver or model module | Cannot assess numerical correctness yet |
 | Validation/reporting | Missing | No tests or report generator | Define output contracts before implementation |
-| Tests/CI | Missing | No `tests/` or workflow | Required before scientific claims are trusted |
+| Tests/CI | Test structure initialized; CI missing | `tests/unit`, `tests/integration`, and `tests/scientific` directories | Add tests and CI before scientific claims are trusted |
 | Examples/data | Missing | No `examples/` directory | Select a legal, non-confidential dataset |
-| License/release files | Missing | No `LICENSE` or release metadata | Decide before public release |
+| License/release files | Initial policy files present | Apache-2.0 license, contributor, security, and conduct files | Review project ownership and contact details before public release |
 
 ## 3. Current phase assessment
 
@@ -52,12 +52,16 @@ What is still required to exit Phase 0:
 
 Until these decisions are made, implementing a general model recommender would create functionality that cannot be scientifically evaluated.
 
+### Phase 1 — Development foundation: Structure initialized, not complete
+
+The repository now has project metadata, Python-version constraints, development-tool configuration, an Apache-2.0 license, contributor/security policy files, and documented package boundaries. This is a foundation milestone, not the Phase 1 exit gate: there are still no executable package modules, tests, or clean-install verification.
+
 ## 4. Phase execution plan
 
 | Phase | Purpose | Main work | Required evidence | Current decision |
 |---|---|---|---|---|
 | 0. Scope and test case | Establish what “correct” means | Choose domain, dataset, model, reference analysis, and acceptance criteria | Approved one-page brief and reference analysis | **Do next** |
-| 1. Foundation | Make the project installable and testable | Add `pyproject.toml`, `src/`, tests, tooling, and CI | Clean clone installs and tests pass | After Phase 0 |
+| 1. Foundation | Make the project installable and testable | Add modules, tests, tooling, and CI around the configured skeleton | Clean clone installs and tests pass | In progress after Phase 0 scope approval |
 | 2. Data inspection | Make input behavior reliable | CSV/Excel intake, profiling, explicit transformations, fixtures | Deterministic quality report and failure tests | Only for selected data format |
 | 3. First model | Prove one scientific calculation | Solver interface, baseline model, parameters, known-answer tests | Results meet declared tolerances | Avoid generic recommender initially |
 | 4. Validation/reporting | Make results interpretable and reproducible | Diagnostics, uncertainty, manifests, report generation | Repeatable run with visible warnings and limitations | Required before pilot |
