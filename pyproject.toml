@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scimodel"
+version = "0.1.0.dev0"
+description = "A transparent and reproducible scientific modeling assistant."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { file = "LICENSE" }
+authors = [{ name = "SciModel contributors" }]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.15,<2",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.9,<1",
+]
+
+[project.urls]
+Documentation = "https://github.com/REPLACE_WITH_OWNER/scimodel/tree/main/docs"
+Issues = "https://github.com/REPLACE_WITH_OWNER/scimodel/issues"
+Repository = "https://github.com/REPLACE_WITH_OWNER/scimodel"
+
+[project.scripts]
+scimodel = "scimodel.interfaces.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scimodel"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/docs", "/README.md", "/LICENSE", "/pyproject.toml"]
+
+[tool.pytest.ini_options]
+addopts = ["--strict-config", "--strict-markers"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["scimodel"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["scimodel"]
+mypy_path = "src"
+
+[tool.coverage.run]
+branch = true
+source = ["scimodel"]
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]

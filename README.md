@@ -36,6 +36,11 @@ Early development — private prototype.
 
 The initial release is intended for testing and evaluation before the project is made publicly available.
 
+For the detailed execution plan and evidence-based progress tracking, see:
+
+- [End-to-End Project Roadmap](docs/SciModel_End_to_End_Project_Roadmap.md)
+- [Project Status Report](docs/PROJECT_STATUS_REPORT.md)
+
 ## Long-term vision
 
 To build a community-driven scientific modeling platform that helps researchers across disciplines move from experimental observations to better-founded mathematical models and reproducible scientific discoveries.

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.Python
+
+# Environments
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Tool and test output
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+dist/
+build/
+
+# Local scientific data and generated runs
+data/private/
+outputs/
+reports/generated/
+*.parquet
+*.pkl
+*.pickle
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
