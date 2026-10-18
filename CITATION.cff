@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: SciModel
+message: "If SciModel contributes to your work, please cite this project."
+type: software
+abstract: >-
+  A transparent and reproducible scientific modeling assistant for moving from
+  experimental data to scientifically justified models.
+repository-code: https://github.com/REPLACE_WITH_OWNER/scimodel
+url: https://github.com/REPLACE_WITH_OWNER/scimodel
+license: Apache-2.0
+version: 0.1.0-dev
+date-released: 2026-10-18
+authors:
+  - name: SciModel contributors
+keywords:
+  - scientific modeling
+  - enzyme kinetics
+  - reproducible research

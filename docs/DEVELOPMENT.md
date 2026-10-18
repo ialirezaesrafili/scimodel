@@ -2,7 +2,7 @@
 
 ## Local setup
 
-The project is configured for Python 3.11–3.13 and an isolated virtual environment. Install development dependencies with the project package manager of choice using the `dev` optional dependency group from `pyproject.toml`.
+The project is configured for Python 3.11–3.14 and an isolated virtual environment. Install development dependencies with the project package manager of choice using the `dev` optional dependency group from `pyproject.toml`.
 
 ## Quality gates
 

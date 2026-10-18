@@ -67,8 +67,8 @@ This status is deliberately evidence-based: a phase is not marked complete becau
 | 2 — Data inspection | **Complete** | CSV adapter, profiling, kinetics validation, JSON output, edge-case tests, and ADR 002 are present | Begin the Phase 3 solver workflow; keep Excel deferred |
 | 3 — Scientific workflow | **Complete** | Michaelis–Menten domain model, bounded SciPy solver, fit result contract, failure handling, CLI, and known-answer tests are present | Preserve solver acceptance criteria |
 | 4 — Validation and reproducibility | **Complete** | Validation checks, diagnostics, manifests, Markdown reports, accuracy assertions, and coverage gate are present | Preserve report and reproducibility contracts |
-| 5 — CLI and backend decision | **Not started** | CLI commands are proposed, not implemented | Freeze the first CLI contract; record the MATLAB decision |
-| 6 — Private pilot | **Not started** | No executable workflow to pilot | Run the first test gate after Phases 1–5 |
+| 5 — CLI and backend decision | **Complete** | CLI reference, quick start, non-interactive commands, exit codes, and ADR 003 are present | Preserve the CLI contract during the pilot |
+| 6 — Private pilot | **Automated pilot complete** | Both approved datasets pass the workflow; pilot report and ADR 004 record performance evidence | Complete one domain-qualified human review before release preparation |
 | 7 — Public-release preparation | **Not started** | Repository is not release-ready | Complete only after the first test gate passes |
 | 8 — Public launch and maintenance | **Not started** | No public release | Publish only after release acceptance criteria pass |
 

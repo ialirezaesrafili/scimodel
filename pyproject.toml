@@ -44,7 +44,20 @@ scimodel = "scimodel.interfaces.cli:main"
 packages = ["src/scimodel"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/docs", "/README.md", "/LICENSE", "/pyproject.toml"]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/examples",
+  "/README.md",
+  "/LICENSE",
+  "/CITATION.cff",
+  "/CONTRIBUTING.md",
+  "/SECURITY.md",
+  "/CODE_OF_CONDUCT.md",
+  "/CHANGELOG.md",
+  "/pyproject.toml",
+]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-config", "--strict-markers"]
@@ -63,8 +76,10 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 known-first-party = ["scimodel"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
+follow_imports = "skip"
+ignore_missing_imports = true
 packages = ["scimodel"]
 mypy_path = "src"
 

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
+import numpy.typing as npt
 from scipy.optimize import least_squares
 from scipy.stats import t
 
@@ -11,8 +14,8 @@ from scimodel.domain.kinetics import michaelis_menten
 
 
 def fit_michaelis_menten(
-    substrate: np.ndarray,
-    velocity: np.ndarray,
+    substrate: npt.NDArray[np.float64],
+    velocity: npt.NDArray[np.float64],
 ) -> FitResult:
     """Fit Michaelis–Menten parameters with bounded TRF least squares."""
     if substrate.ndim != 1 or velocity.ndim != 1 or substrate.shape != velocity.shape:
@@ -30,7 +33,7 @@ def fit_michaelis_menten(
 
     initial = _lineweaver_burk_initial_guess(substrate, velocity)
 
-    def residuals(parameters: np.ndarray) -> np.ndarray:
+    def residuals(parameters: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         return michaelis_menten(substrate, parameters[0], parameters[1]) - velocity
 
     try:
@@ -44,14 +47,15 @@ def fit_michaelis_menten(
     except (ValueError, np.linalg.LinAlgError) as exc:
         raise ModelFitError(f"Michaelis–Menten optimization failed: {exc}") from exc
 
-    parameters = optimization.x
-    fitted = michaelis_menten(substrate, parameters[0], parameters[1])
+    parameters = cast(npt.NDArray[np.float64], optimization.x)
+    fitted = michaelis_menten(substrate, float(parameters[0]), float(parameters[1]))
     errors = velocity - fitted
     rss = float(np.sum(errors**2))
     rmse = float(np.sqrt(rss / len(velocity)))
     total_sum_squares = float(np.sum((velocity - np.mean(velocity)) ** 2))
     r_squared = 1.0 - (rss / total_sum_squares) if total_sum_squares else float("nan")
-    standard_errors = _standard_errors(optimization.jac, rss, len(velocity), len(parameters))
+    jacobian = cast(npt.NDArray[np.float64], optimization.jac)
+    standard_errors = _standard_errors(jacobian, rss, len(velocity), len(parameters))
     confidence_intervals = _confidence_intervals(
         parameters,
         standard_errors,
@@ -76,9 +80,9 @@ def fit_michaelis_menten(
 
 
 def _lineweaver_burk_initial_guess(
-    substrate: np.ndarray,
-    velocity: np.ndarray,
-) -> np.ndarray:
+    substrate: npt.NDArray[np.float64],
+    velocity: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float64]:
     """Get positive seeds from reciprocal coordinates when possible."""
     positive = (substrate > 0) & (velocity > 0)
     if positive.sum() >= 2:
@@ -92,7 +96,7 @@ def _lineweaver_burk_initial_guess(
 
 
 def _standard_errors(
-    jacobian: np.ndarray,
+    jacobian: npt.NDArray[np.float64],
     rss: float,
     observations: int,
     parameters: int,
@@ -107,7 +111,7 @@ def _standard_errors(
 
 
 def _confidence_intervals(
-    parameters: np.ndarray,
+    parameters: npt.NDArray[np.float64],
     standard_errors: tuple[float, ...],
     *,
     observations: int,

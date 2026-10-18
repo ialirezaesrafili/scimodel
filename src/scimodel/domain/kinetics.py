@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
+import numpy.typing as npt
 
 
-def michaelis_menten(substrate: np.ndarray, vmax: float, km: float) -> np.ndarray:
+def michaelis_menten(
+    substrate: npt.NDArray[np.float64], vmax: float, km: float
+) -> npt.NDArray[np.float64]:
     """Calculate reaction velocity using the Michaelis–Menten equation."""
-    return (vmax * substrate) / (km + substrate)
+    values = (vmax * substrate) / (km + substrate)
+    return cast(npt.NDArray[np.float64], values)

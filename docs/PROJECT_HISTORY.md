@@ -64,6 +64,35 @@ This document records meaningful project milestones and decisions. It complement
 - Confirmed 30 tests pass with 89% measured coverage against the configured 85% minimum.
 - Completed the Phase 4 validation and reproducibility milestone.
 
+## 2026-10-18 — Phase 5 CLI and backend decision completed
+
+- Documented the complete CLI contract, quick-start workflow, JSON outputs, report artifacts, and exit codes.
+- Confirmed the workflow is non-interactive and scriptable.
+- Recorded ADR 003: SciPy is the default MVP numerical backend; MATLAB is deferred.
+- Completed the Phase 5 exit gate.
+
+## 2026-10-18 — Phase 6 automated private pilot started
+
+- Ran inspect, validate, and report workflows against both approved datasets using `.venv`.
+- Functional, scientific accuracy, reproducibility, artifact, and local-only checks passed.
+- Recorded runtime of approximately 0.54–0.64 seconds per command.
+- Recorded peak child-process RSS of approximately 105 MB, above the original 20 MB planning target.
+- Pilot status: functional pass; performance review and domain-qualified human review remain open.
+
+## 2026-10-18 — Automated private pilot completed
+
+- Added automated regression coverage for the complete report bundle on both approved datasets.
+- Recorded ADR 004 to distinguish measured cold-start resource behavior from unverified hard targets.
+- Automated pilot is complete; one domain-qualified human review remains required before release preparation.
+
+## 2026-10-18 — Phase 7 release preparation started
+
+- Added citation metadata, issue templates, pull-request checklist, CODEOWNERS placeholder, and release checklist.
+- Expanded source-distribution contents to include examples and project governance files.
+- Recorded the remaining publication blockers explicitly; repository visibility must remain private until they are resolved.
+- Verified production wheel build, clean-target installation, version command, and synthetic validation workflow.
+- Installed and passed strict mypy locally; the CI quality gates are now executable in the release environment.
+
 ## 2026-10-17 — Phase 3 failure handling hardened
 
 - Added solver rejection tests for insufficient observations, insufficient concentration levels, non-finite values, and negative values.

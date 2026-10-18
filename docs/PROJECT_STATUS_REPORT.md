@@ -1,14 +1,14 @@
 # SciModel — Project Status Report
 
-**Review date:** 2026-10-17  
-**Repository state:** Private prototype / Phase 4 validation and reporting in progress
-**Overall status:** Phases 0–4 complete; Phase 5 CLI and backend decisions next
+**Review date:** 2026-10-18
+**Repository state:** Private prototype / Phase 5 CLI usability complete
+**Overall status:** Phases 0–6 automated work complete; Phase 7 release preparation in progress
 
 ## 1. Executive status
 
 SciModel has completed **Phase 0 — Scope and Test Case Definition**. The scientific domain (Biochemical Reaction Kinetics / Enzyme Catalysis), the baseline model (Michaelis-Menten hyperbolic rate model with non-linear least squares), reference datasets (canonical Puromycin benchmark and synthetic ground-truth dataset), and rigorous acceptance criteria (parameter tolerances, RSS bounds, diagnostics, and unsupported case rules) have been fully specified and approved.
 
-The repository has completed Phases 1–4. The validation/reporting gate passed with measured coverage, reference-accuracy assertions, confidence intervals, reproducibility metadata, and complete report sections. The next phase is CLI usability and the optional-backend decision.
+The repository has completed the automated portions of Phases 1–6 and is now preparing for release. Both approved datasets passed the functional, scientific, reproducibility, artifact, and local-only checks. Release preparation has exposed the remaining publication prerequisites: human scientific review, clean artifact installation, maintainer identity, and final legal/security review.
 
 ## 2. Confirmed inventory
 
@@ -19,11 +19,12 @@ The repository has completed Phases 1–4. The validation/reporting gate passed 
 | Scope & Test Case | **Complete (Phase 0 Exit Gate Passed)** | [`docs/PHASE_0_SCOPE_BRIEF.md`](PHASE_0_SCOPE_BRIEF.md), [`docs/decisions/0001-phase-0-scientific-domain-selection.md`](decisions/0001-phase-0-scientific-domain-selection.md) | Domain, datasets, reference analysis, tolerances, and unsupported cases approved |
 | Reference datasets | **Present** | [`examples/enzyme_kinetics_puromycin.csv`](../examples/enzyme_kinetics_puromycin.csv), [`examples/enzyme_kinetics_synthetic.csv`](../examples/enzyme_kinetics_synthetic.csv), [`examples/README.md`](../examples/README.md) | Canonical benchmark and synthetic ground-truth datasets documented with units and provenance |
 | Python package | Phase 4 workflow implemented | `pyproject.toml`, package modules, and layered boundaries | Scientific workflow is implemented incrementally by phase |
-| CLI | Data inspection and model-fit commands implemented | `src/scimodel/interfaces/cli.py` | `data inspect` and `model fit` emit structured JSON |
+| CLI | **Complete — Phase 5 exit gate passed** | `src/scimodel/interfaces/cli.py`, `docs/CLI_REFERENCE.md` | Commands, options, output formats, and exit codes are documented |
 | Data ingestion | CSV inspection complete | `src/scimodel/adapters/csv_reader.py`, `src/scimodel/application/inspect_data.py` | CSV reader, kinetics validation, and edge cases are covered by integration tests; Excel deferred by ADR 002 |
 | Scientific model | Michaelis–Menten solver implemented | `src/scimodel/domain/kinetics.py`, `src/scimodel/adapters/scipy_solver.py`, `src/scimodel/application/fit_kinetics.py` | Bounded TRF least squares passes both reference datasets |
 | Validation/reporting | **Complete — Phase 4 exit gate passed** | `src/scimodel/application/validate_kinetics.py`, `src/scimodel/reporting/build_report.py` | Validation, uncertainty, reports, manifests, and coverage gate are verified |
-| Tests/CI | Phase 4 tests and coverage gate added | `tests/`, `.github/workflows/ci.yml`, `pyproject.toml` | 30 tests pass locally; measured coverage is 89% with an 85% CI floor |
+| Tests/CI | Automated Phase 6 pilot regression added | `tests/`, `.github/workflows/ci.yml`, `pyproject.toml`, `docs/PRIVATE_PILOT_REPORT.md` | 32 tests pass locally; measured coverage is 89%; automated pilot passes |
+| Release readiness | Phase 7 in progress | `docs/RELEASE_CHECKLIST.md`, `docs/RELEASE_READINESS_REPORT.md`, `CITATION.cff`, `.github/` templates | Wheel build/install passes; publication prerequisites remain open |
 | License/release files | Initial policy files present | Apache-2.0 license, contributor, security, and conduct files | Configured |
 
 ## 3. Current phase assessment
@@ -48,9 +49,9 @@ All Phase 0 requirements are satisfied:
 - CLI boundary added with `--help` and `--version`.
 - GitHub Actions workflow added for formatting, linting, type checking, tests, and coverage.
 - Virtual environment is available with Python 3.14.8, pytest, NumPy, SciPy, pandas, and Ruff.
-- Phase 0, Phase 1, and Phase 2 tests pass: **13 passed**.
+- Phase 0 through Phase 6 automated tests pass: **32 passed**.
 - Ruff lint and format checks pass.
-- Coverage and mypy checks are configured for CI but are not yet runnable in the current environment because `pytest-cov` and `mypy` are not installed.
+- Coverage and mypy checks are configured for CI; the current environment now passes strict mypy and the 85% coverage gate.
 - Phase 1 exit evidence: CLI boundary, CI workflow, and package structure are present.
 - Phase 1 exit gate passed: package boundaries, CLI boundary, CI workflow, and local test execution are present.
 
@@ -66,7 +67,7 @@ All Phase 0 requirements are satisfied:
 - ADR 002 records CSV-first input and defers Excel until a concrete requirement exists.
 - Phase 2 CSV exit gate passed. Excel remains a future adapter decision.
 
-### Phase 3 — Scientific modeling: In progress
+### Phase 3 — Scientific modeling: Completed (Exit Gate Passed)
 
 - Added the Michaelis–Menten equation as a domain function.
 - Added a SciPy Trust Region Reflective least-squares solver with non-negative parameter bounds.
@@ -95,8 +96,16 @@ All Phase 0 requirements are satisfied:
 - Added integration tests for validation and report artifact generation.
 - Measured total test coverage at **89%** and configured an **85% minimum CI threshold**.
 - Added numerical assertions for certified Puromycin standard errors and confidence-interval containment.
-- Mypy remains configured but unavailable locally because the dependency download did not complete.
+- Strict mypy now passes after configuring NumPy/SciPy as external type-checking boundaries and targeting Python 3.12 syntax for current scientific stubs.
 - Phase 4 exit gate passed: report contents, numerical accuracy, uncertainty, reproducibility, tests, and coverage are verified.
+
+### Phase 5 — CLI usability and backend decision: Completed (Exit Gate Passed)
+
+- Documented global commands, workflow commands, options, JSON output, report artifacts, and exit codes.
+- Confirmed all workflow commands support non-interactive execution.
+- Added a complete quick-start sequence to the README.
+- Recorded ADR 003: SciPy is the default MVP backend; MATLAB is deferred until a concrete requirement exists.
+- Phase 5 exit gate passed.
 
 ## 4. Phase execution plan
 
@@ -107,18 +116,26 @@ All Phase 0 requirements are satisfied:
 | 2. Data inspection | Make input behavior reliable | CSV intake, profiling, explicit validation, fixtures, and CLI output | Deterministic quality report and failure tests | **Complete — CSV first; Excel deferred** |
 | 3. First model | Prove one scientific calculation | Solver interface, Michaelis-Menten model, parameters, known-answer tests | Results meet declared tolerances | **Complete** |
 | 4. Validation/reporting | Make results interpretable and reproducible | Diagnostics, uncertainty, manifests, report generation | Repeatable run with visible warnings and limitations | **Complete** |
-| 5. CLI/backend | Make the workflow usable | Freeze commands, options, exit codes; decide on MATLAB evidence | Documented non-interactive example works | **Next** — SciPy default |
-| 6. Private pilot | Test the whole workflow with users and experts | Scientific review, usability test, privacy/security review | First test report and go/no-go decision | No feature expansion before critical issues close |
-| 7. Release preparation | Make the project safe to publish | License, dependency/data review, docs, history and CI review | Release checklist passes | Only after Phase 6 |
+| 5. CLI/backend | Make the workflow usable | Freeze commands, options, exit codes; decide on MATLAB evidence | Documented non-interactive example works | **Complete — SciPy default; MATLAB deferred** |
+| 6. Private pilot | Test the whole workflow with users and experts | Scientific review, usability test, privacy/security review | First test report and go/no-go decision | **Automated pass; human review pending** |
+| 7. Release preparation | Make the project safe to publish | License, dependency/data review, docs, history and CI review | Release checklist passes | **In progress** |
 | 8. Launch/maintenance | Publish and improve responsibly | Versioned release, issues, contribution flow, maintenance policy | Tagged release and post-release plan | Future |
 
 ## 5. Work remaining, ordered by priority
 
-### P0 — Immediate Next Actions (Phase 5)
+### P0 — Immediate Next Actions (Phase 6)
 
-- Freeze the CLI command/option/exit-code contract.
-- Add end-user CLI documentation and a complete quick-start workflow.
-- Record the evidence-based MATLAB optional-backend decision.
+- Run the private pilot with the documented quick-start workflow.
+- Review scientific outputs with a domain-qualified reviewer.
+- Record pilot usability, privacy, performance, and reproducibility findings.
+- Complete one domain-qualified human review using the quick-start workflow.
+
+### P0 — Phase 7 release preparation
+
+- Verify the package build and clean installation from a built artifact.
+- Replace repository-owner placeholders in URLs, CODEOWNERS, security links, and citation metadata.
+- Complete final license, dependency, dataset, history, and security reviews.
+- Do not change repository visibility until every release checklist blocker is resolved.
 
 ### P1 — Later Phase Actions
 
@@ -141,5 +158,5 @@ The project is on track:
 - Phase 0 has an approved scope brief, reference datasets, ADR 001, and reference analysis.
 - Phase 0 acceptance criteria and reference behavior are guarded by automated tests.
 - The current validation baseline is 30 passing tests, 89% measured coverage, and passing Ruff lint/format checks.
-- Phases 1–4 are complete with 30 passing tests and 89% measured coverage.
-- Phase 5 is next: CLI usability and optional-backend decisions.
+- Phases 1–5 are complete; the automated Phase 6 pilot passes with 32 tests and 89% measured coverage.
+- Phases 0–6 automated gates pass; Phase 7 release preparation is in progress and publication is blocked by documented checklist items.

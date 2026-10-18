@@ -15,3 +15,8 @@ All notable changes to SciModel will be documented here.
 - Added explicit Phase 3 solver and CLI failure-case handling tests.
 - Added Phase 4 validation diagnostics, reproducibility manifests, report artifacts, and CLI commands.
 - Added measured coverage reporting with an 85% CI threshold and stronger uncertainty accuracy tests.
+- Added the CLI reference, quick-start workflow, and SciPy-default/MATLAB-deferred backend decision.
+- Added the private pilot protocol and initial pilot report, including performance follow-up findings.
+- Added automated private-pilot regression checks and the resource-target decision record.
+- Added Phase 7 release metadata, issue templates, contributor workflow, citation metadata, and release checklist.
+- Added the release-readiness report and verified the production wheel build/install path.

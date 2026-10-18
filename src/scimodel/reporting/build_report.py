@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from scimodel.application.validate_kinetics import validate_csv
 from scimodel.infrastructure.reproducibility import build_manifest
@@ -58,15 +59,15 @@ def build_csv_report(
     return ReportArtifacts(report_path, manifest_path, fit_path, validation_path), validation.valid
 
 
-def _write_json(path: Path, value: dict[str, object]) -> None:
+def _write_json(path: Path, value: dict[str, Any]) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _render_markdown(
     input_path: Path,
-    result: dict[str, object],
-    validation: dict[str, object],
-    manifest: dict[str, object],
+    result: dict[str, Any],
+    validation: dict[str, Any],
+    manifest: dict[str, Any],
 ) -> str:
     parameters = result["parameters"]
     metrics = result["metrics"]
@@ -118,7 +119,7 @@ def _render_markdown(
 """
         + "\n".join(
             f"| {check['name']} | {'PASS' if check['passed'] else 'FAIL'} | {check['message']} |"
-            for check in checks  # type: ignore[union-attr]
+            for check in checks
         )
         + f"""
 

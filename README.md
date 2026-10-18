@@ -42,6 +42,7 @@ For the detailed execution plan and evidence-based progress tracking, see:
 - [Project Status Report](docs/PROJECT_STATUS_REPORT.md)
 - [Architecture Guide](docs/ARCHITECTURE.md)
 - [Development Guide](docs/DEVELOPMENT.md)
+- [CLI Reference](docs/CLI_REFERENCE.md)
 
 ## Repository structure
 
@@ -65,6 +66,16 @@ scimodel/
 ```
 
 The architecture boundaries are configured, and the Phase 0 reference datasets, data-inspection workflow, and initial scientific fitting workflow are present. Further capabilities will be added phase by phase while preserving these boundaries.
+
+## Quick start
+
+```bash
+python -m scimodel data inspect examples/enzyme_kinetics_puromycin.csv
+python -m scimodel model validate examples/enzyme_kinetics_puromycin.csv
+python -m scimodel report build examples/enzyme_kinetics_puromycin.csv --output-dir reports/run-001
+```
+
+See the [CLI Reference](docs/CLI_REFERENCE.md) for command contracts and exit codes.
 
 ## Long-term vision
 
