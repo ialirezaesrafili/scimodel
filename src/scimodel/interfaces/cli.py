@@ -6,7 +6,9 @@ import argparse
 import json
 import re
 from collections.abc import Sequence
+from dataclasses import asdict
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -14,12 +16,23 @@ from scimodel import __version__
 from scimodel.adapters.csv_reader import CsvReadError, read_csv
 from scimodel.adapters.matlab_solver import MatlabFormulaSolver, MatlabUnavailableError
 from scimodel.adapters.scipy_formula_solver import ScipyFormulaSolver
+from scimodel.application.assistant_workflow import (
+    run_assistant,
+    save_run,
+)
+from scimodel.application.compare_models import compare_csv_models
 from scimodel.application.fit_kinetics import fit_csv
 from scimodel.application.inspect_data import inspect_csv
+from scimodel.application.providers import JsonPlanProvider, ProviderPlanError
 from scimodel.application.recommender import RuleBasedFormulaRecommender
 from scimodel.application.validate_kinetics import validate_csv
+from scimodel.domain.assistant import TaskRequest
 from scimodel.domain.fit import ModelFitError
 from scimodel.domain.formula import _ALLOWED_FUNCTIONS, ModelFormula, ParameterSpec
+from scimodel.evaluation.runner import compare_evaluations, evaluate_suite, save_evaluation
+from scimodel.infrastructure.context_store import ContextStore
+from scimodel.infrastructure.recommendation_store import RecommendationStore
+from scimodel.infrastructure.run_store import RunStore, compare_runs
 from scimodel.reporting.build_report import build_csv_report
 
 
@@ -126,6 +139,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     formula_fit_parser.add_argument("--x-column", default="substrate_conc")
     formula_fit_parser.add_argument("--y-column", default="reaction_velocity")
+    formula_compare_parser = formula_subparsers.add_parser(
+        "compare", help="Compare recommended formulas without selecting one."
+    )
+    formula_compare_parser.add_argument("path", type=Path)
+    formula_compare_parser.add_argument("--objective", default="enzyme kinetics")
+    formula_compare_parser.add_argument("--x-column", default="substrate_conc")
+    formula_compare_parser.add_argument("--y-column", default="reaction_velocity")
 
     # report build
     report_parser = subparsers.add_parser("report", help="Build reproducible reports.")
@@ -135,6 +155,100 @@ def build_parser() -> argparse.ArgumentParser:
     build_parser.add_argument("--output-dir", type=Path, required=True)
     build_parser.add_argument("--x-column", default="substrate_conc")
     build_parser.add_argument("--y-column", default="reaction_velocity")
+
+    assistant_parser = subparsers.add_parser(
+        "assistant", help="Run the transparent assistant workflow."
+    )
+    assistant_subparsers = assistant_parser.add_subparsers(dest="assistant_command", required=True)
+    run_parser = assistant_subparsers.add_parser(
+        "run", help="Plan, execute, verify, and report one supported scientific task."
+    )
+    run_parser.add_argument("path", type=Path, help="Path to the CSV dataset.")
+    run_parser.add_argument("--goal", required=True, help="The scientific task objective.")
+    run_parser.add_argument("--mode", choices=["normal", "verbose", "audit"], default="normal")
+    run_parser.add_argument("--output-dir", type=Path, default=Path("reports/assistant-run"))
+    run_parser.add_argument("--x-column", default="substrate_conc")
+    run_parser.add_argument("--y-column", default="reaction_velocity")
+    run_parser.add_argument("--history-dir", type=Path, default=Path(".scimodel/runs"))
+    run_parser.add_argument("--context-dir", type=Path, default=Path(".scimodel/context"))
+    run_parser.add_argument(
+        "--recommendation-dir", type=Path, default=Path(".scimodel/recommendations")
+    )
+    run_parser.add_argument(
+        "--provider-plan",
+        type=Path,
+        help="Use a validated provider-generated JSON plan instead of the deterministic planner.",
+    )
+    history_parser = assistant_subparsers.add_parser("history", help="List stored assistant runs.")
+    history_parser.add_argument("--history-dir", type=Path, default=Path(".scimodel/runs"))
+    show_parser = assistant_subparsers.add_parser("show", help="Show one stored assistant run.")
+    show_parser.add_argument("run_id")
+    show_parser.add_argument("--history-dir", type=Path, default=Path(".scimodel/runs"))
+    compare_parser = assistant_subparsers.add_parser("compare", help="Compare two stored runs.")
+    compare_parser.add_argument("first_run")
+    compare_parser.add_argument("second_run")
+    compare_parser.add_argument("--history-dir", type=Path, default=Path(".scimodel/runs"))
+    context_parser = assistant_subparsers.add_parser(
+        "context", help="Manage stored assistant context."
+    )
+    context_subparsers = context_parser.add_subparsers(dest="context_command", required=True)
+    context_set = context_subparsers.add_parser("set", help="Create or update a context item.")
+    context_set.add_argument("key")
+    context_set.add_argument("value")
+    context_set.add_argument("--kind", choices=["preference", "fact", "constraint"], default="fact")
+    context_set.add_argument("--source", default="user")
+    context_set.add_argument("--confidence", choices=["low", "medium", "high"], default="high")
+    context_set.add_argument(
+        "--status", choices=["active", "uncertain", "rejected"], default="active"
+    )
+    context_set.add_argument("--context-dir", type=Path, default=Path(".scimodel/context"))
+    context_list = context_subparsers.add_parser("list", help="List stored context items.")
+    context_list.add_argument("--context-dir", type=Path, default=Path(".scimodel/context"))
+    context_show = context_subparsers.add_parser("show", help="Show one context item.")
+    context_show.add_argument("key")
+    context_show.add_argument("--context-dir", type=Path, default=Path(".scimodel/context"))
+    context_remove = context_subparsers.add_parser("remove", help="Remove one context item.")
+    context_remove.add_argument("key")
+    context_remove.add_argument("--context-dir", type=Path, default=Path(".scimodel/context"))
+    recommendation_parser = assistant_subparsers.add_parser(
+        "recommendation", help="Review assistant recommendations."
+    )
+    recommendation_subparsers = recommendation_parser.add_subparsers(
+        dest="recommendation_command", required=True
+    )
+    recommendation_list = recommendation_subparsers.add_parser("list", help="List recommendations.")
+    recommendation_list.add_argument(
+        "--recommendation-dir", type=Path, default=Path(".scimodel/recommendations")
+    )
+    recommendation_show = recommendation_subparsers.add_parser(
+        "show", help="Show one recommendation."
+    )
+    recommendation_show.add_argument("recommendation_id")
+    recommendation_show.add_argument(
+        "--recommendation-dir", type=Path, default=Path(".scimodel/recommendations")
+    )
+    for command in ("accept", "reject"):
+        recommendation_action = recommendation_subparsers.add_parser(command)
+        recommendation_action.add_argument("recommendation_id")
+        recommendation_action.add_argument("--reason", default="")
+        recommendation_action.add_argument(
+            "--recommendation-dir", type=Path, default=Path(".scimodel/recommendations")
+        )
+    recommendation_correct = recommendation_subparsers.add_parser(
+        "correct", help="Correct a recommendation and record why."
+    )
+    recommendation_correct.add_argument("recommendation_id")
+    recommendation_correct.add_argument("--action", required=True)
+    recommendation_correct.add_argument("--reason", required=True)
+    recommendation_correct.add_argument(
+        "--recommendation-dir", type=Path, default=Path(".scimodel/recommendations")
+    )
+    evaluate_parser = assistant_subparsers.add_parser(
+        "evaluate", help="Run or compare the assistant benchmark suite."
+    )
+    evaluate_parser.add_argument("--project-root", type=Path, default=Path.cwd())
+    evaluate_parser.add_argument("--output-dir", type=Path, default=Path("reports/evaluation"))
+    evaluate_parser.add_argument("--compare", nargs=2, metavar=("FIRST", "SECOND"))
 
     return parser
 
@@ -222,6 +336,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(fit_res.to_dict(), indent=2, sort_keys=True))
         return 0 if fit_res.converged else 2
 
+    if arguments.command == "formula" and arguments.formula_command == "compare":
+        try:
+            comparison = compare_csv_models(
+                arguments.path,
+                objective=arguments.objective,
+                x_column=arguments.x_column,
+                y_column=arguments.y_column,
+            )
+        except (CsvReadError, ModelFitError, ValueError) as exc:
+            parser.error(str(exc))
+        print(json.dumps(comparison, indent=2, sort_keys=True))
+        return 0
+
     if arguments.command == "report" and arguments.report_command == "build":
         try:
             artifacts, valid = build_csv_report(
@@ -234,6 +361,147 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error(str(exc))
         print(json.dumps({"valid": valid, "artifacts": artifacts.to_dict()}, indent=2))
         return 0 if valid else 2
+
+    if arguments.command == "assistant" and arguments.assistant_command == "run":
+        request = TaskRequest(
+            objective=arguments.goal,
+            input_path=str(arguments.path),
+            x_column=arguments.x_column,
+            y_column=arguments.y_column,
+        )
+        context_items = tuple(ContextStore(arguments.context_dir).list())
+        try:
+            provider = (
+                JsonPlanProvider(arguments.provider_plan) if arguments.provider_plan else None
+            )
+            run = run_assistant(request, arguments.output_dir, context_items, provider)
+        except (OSError, ValueError, ProviderPlanError) as exc:
+            parser.error(str(exc))
+        audit_path = save_run(run, arguments.output_dir) if arguments.mode == "audit" else None
+        history_id = RunStore(arguments.history_dir).save(run)
+        recommendation_id = RecommendationStore(arguments.recommendation_dir).save(
+            run.recommendation, history_id
+        )
+        if arguments.mode == "verbose":
+            print(json.dumps({"plan": [asdict(step) for step in run.plan]}, indent=2))
+        assistant_output: dict[str, Any] = {
+            "status": run.status,
+            "objective": run.request.objective,
+            "verification": asdict(run.verification),
+            "recommendation": run.recommendation,
+        }
+        if audit_path is not None:
+            assistant_output["audit_record"] = str(audit_path)
+        assistant_output["run_id"] = history_id
+        assistant_output["recommendation"]["recommendation_id"] = recommendation_id
+        print(json.dumps(assistant_output, indent=2, sort_keys=True))
+        return 0 if run.status == "success" else 2
+
+    if arguments.command == "assistant" and arguments.assistant_command == "recommendation":
+        store = RecommendationStore(arguments.recommendation_dir)
+        try:
+            command = arguments.recommendation_command
+            if command == "list":
+                print(json.dumps(store.list(), indent=2, sort_keys=True))
+            elif command == "show":
+                print(json.dumps(store.get(arguments.recommendation_id), indent=2, sort_keys=True))
+            elif command == "accept":
+                print(
+                    json.dumps(
+                        store.update(
+                            arguments.recommendation_id, "accepted", reason=arguments.reason
+                        ),
+                        indent=2,
+                        sort_keys=True,
+                    )
+                )
+            elif command == "reject":
+                print(
+                    json.dumps(
+                        store.update(
+                            arguments.recommendation_id, "rejected", reason=arguments.reason
+                        ),
+                        indent=2,
+                        sort_keys=True,
+                    )
+                )
+            else:
+                print(
+                    json.dumps(
+                        store.update(
+                            arguments.recommendation_id,
+                            "corrected",
+                            corrected_action=arguments.action,
+                            reason=arguments.reason,
+                        ),
+                        indent=2,
+                        sort_keys=True,
+                    )
+                )
+        except (FileNotFoundError, ValueError) as exc:
+            parser.error(str(exc))
+        return 0
+
+    if arguments.command == "assistant" and arguments.assistant_command == "evaluate":
+        try:
+            if arguments.compare:
+                first = json.loads(Path(arguments.compare[0]).read_text(encoding="utf-8"))
+                second = json.loads(Path(arguments.compare[1]).read_text(encoding="utf-8"))
+                print(json.dumps(compare_evaluations(first, second), indent=2, sort_keys=True))
+                return 0
+            evaluation_report = evaluate_suite(arguments.project_root, arguments.output_dir)
+            path = save_evaluation(evaluation_report, arguments.output_dir)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            parser.error(str(exc))
+        print(json.dumps({"report": str(path), **evaluation_report}, indent=2, sort_keys=True))
+        return 0 if evaluation_report["score"] == 1.0 else 2
+
+    if arguments.command == "assistant" and arguments.assistant_command == "context":
+        context_store = ContextStore(arguments.context_dir)
+        try:
+            if arguments.context_command == "set":
+                item = context_store.set(
+                    arguments.key,
+                    arguments.value,
+                    kind=arguments.kind,
+                    source=arguments.source,
+                    confidence=arguments.confidence,
+                    status=arguments.status,
+                )
+                print(json.dumps(item.__dict__, indent=2, sort_keys=True))
+            elif arguments.context_command == "list":
+                print(json.dumps(context_store.list(), indent=2, sort_keys=True))
+            elif arguments.context_command == "show":
+                print(json.dumps(context_store.get(arguments.key), indent=2, sort_keys=True))
+            else:
+                context_store.remove(arguments.key)
+                print(json.dumps({"removed": arguments.key}, indent=2))
+        except (FileNotFoundError, ValueError) as exc:
+            parser.error(str(exc))
+        return 0
+
+    if arguments.command == "assistant" and arguments.assistant_command == "history":
+        print(json.dumps(RunStore(arguments.history_dir).list(), indent=2, sort_keys=True))
+        return 0
+
+    if arguments.command == "assistant" and arguments.assistant_command == "show":
+        try:
+            record = RunStore(arguments.history_dir).load(arguments.run_id)
+        except (FileNotFoundError, ValueError) as exc:
+            parser.error(str(exc))
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+
+    if arguments.command == "assistant" and arguments.assistant_command == "compare":
+        run_store = RunStore(arguments.history_dir)
+        try:
+            comparison = compare_runs(
+                run_store.load(arguments.first_run), run_store.load(arguments.second_run)
+            )
+        except (FileNotFoundError, ValueError) as exc:
+            parser.error(str(exc))
+        print(json.dumps(comparison, indent=2, sort_keys=True))
+        return 0
 
     parser.print_help()
     return 0

@@ -7,7 +7,7 @@
 ## Verified
 
 - 32 automated tests pass.
-- Measured coverage is 89%, above the configured 85% threshold.
+- Measured coverage is 85.63%, above the configured 85% threshold.
 - Ruff linting and formatting pass.
 - The production wheel builds successfully with Hatchling.
 - The built wheel installs into a clean target directory and runs `--version` and the synthetic validation workflow.

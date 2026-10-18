@@ -16,7 +16,7 @@ Use this checklist before changing repository visibility or publishing a release
 - [x] `pyproject.toml` and `src/` package layout are present.
 - [x] CLI reference and quick start are documented.
 - [x] CI runs linting, formatting, type checking, tests, and coverage.
-- [x] Coverage is 89%, above the configured 85% minimum.
+- [x] Coverage is 85.63%, above the configured 85% minimum.
 - [x] Production wheel builds successfully and installs into a clean target directory.
 - [ ] Clean install from a built artifact verified across all supported Python versions.
 - [ ] Mypy passes in the release environment.

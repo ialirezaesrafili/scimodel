@@ -4,7 +4,26 @@
 
 SciModel uses a layered, dependency-inverted architecture. Scientific rules and use-case decisions must remain testable without a CLI, filesystem, database, MATLAB installation, or network service.
 
-The initial structure is deliberately empty. It defines ownership and dependency direction before implementation begins.
+The repository now contains the first complete vertical slice. The
+deterministic planner is the default, while provider-based planning is an
+optional boundary. Scientific computation remains local and independent of
+any language-model provider.
+
+```mermaid
+flowchart LR
+    U[User / CLI] --> O[Assistant orchestration]
+    O --> P{Planning provider}
+    P -->|default| D[Deterministic provider]
+    P -->|optional, explicit| E[External provider adapter]
+    D --> S[Validated structured plan]
+    E --> S
+    S --> G[Tool and permission boundary]
+    G --> T[Registered tools]
+    T --> Sci[Local SciModel engine]
+    Sci --> V[Verification]
+    V --> R[Report, audit record, history]
+    R --> N[Recommendation]
+```
 
 ```text
 interfaces  →  application  →  domain
@@ -45,11 +64,47 @@ The first vertical slice should follow this sequence:
 
 Each step should expose structured results and warnings. Terminal text is a presentation concern, not a scientific result format.
 
+## Current provider and deployment boundary
+
+SciModel is local-first:
+
+- The deterministic provider and scientific engine run locally.
+- No network call is required for the supported workflow.
+- Provider plans must identify themselves and contain validated steps.
+- A provider may plan work, but it cannot bypass registered tools or execute
+  arbitrary code through the assistant boundary.
+- Scientific fitting, validation, reports, and audit records remain local.
+- A hosted provider is not enabled by default and must be introduced through
+  the gated process in [`PROVIDER_INTEGRATION_WORKFLOW.md`](PROVIDER_INTEGRATION_WORKFLOW.md).
+
+The current implementation has a JSON plan adapter for controlled integration
+testing. It is not evidence that a hosted or local language model has been
+installed or approved for production use.
+
+## End-to-end procedure
+
+```mermaid
+flowchart TD
+    A[Task, data, constraints] --> B[Inspect inputs]
+    B --> C[Create structured plan]
+    C --> D[Validate tools, permissions, and inputs]
+    D --> E[Execute registered scientific tools]
+    E --> F[Verify outputs and scientific constraints]
+    F --> G{Goal met?}
+    G -->|yes| H[Write report and run record]
+    G -->|no| I[Record honest failure or partial result]
+    H --> J[Recommend next action]
+    I --> J
+    J --> K[User review and feedback]
+    K --> L[Evaluation / controlled improvement]
+```
+
 ## Deferred decisions
 
-The following are intentionally not selected in the skeleton:
+The following remain intentionally deferred:
 
-- The first scientific domain and model family.
+- Additional scientific domains and model families beyond the supported
+  kinetics workflow.
 - A dataframe/array abstraction beyond the selected workflow.
 - Configuration file format for user projects.
 - MATLAB integration.

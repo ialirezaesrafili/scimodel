@@ -93,6 +93,108 @@ This document records meaningful project milestones and decisions. It complement
 - Verified production wheel build, clean-target installation, version command, and synthetic validation workflow.
 - Installed and passed strict mypy locally; the CI quality gates are now executable in the release environment.
 
+## 2026-10-18 — Assistant Phase 1 completed
+
+- Added the first deterministic assistant workflow around the verified SciModel engine.
+- Added structured task, plan, tool-call, verification, recommendation, and audit-record contracts.
+- Added the registered inspect → validate → report tool sequence.
+- Added normal, verbose, and audit CLI modes with honest failure handling.
+- Verified a complete synthetic-dataset run with all report artifacts and an `assistant_run.json` audit record.
+- Expanded the suite to 65 passing tests.
+- Deferred language-model provider integration until the deterministic workflow contract is stable.
+
+## 2026-10-18 — Assistant Phase 2 completed
+
+- Added versioned schemas for every assistant tool, including declared inputs and outputs.
+- Added preflight request validation for goals, CSV inputs, required columns, and file existence.
+- Added categorized tool errors for request, input, scientific, filesystem, and unexpected failures.
+- Added tool version and exact tool inputs to each execution record.
+- Verified both approved datasets through the stable Phase 2 tool contract.
+
+## 2026-10-18 — Assistant Phase 3 completed
+
+- Added persistent run history with content-derived IDs and one JSON record per run.
+- Added history listing, run inspection, and run-comparison CLI commands.
+- Added deterministic provider metadata and approval-record fields to assistant runs.
+- Added recursive redaction of common secret-bearing fields before persistence.
+- Verified two real runs can be stored, listed, loaded, and compared.
+
+## 2026-10-18 — Assistant Phase 4 completed
+
+- Added inspectable context storage for preferences, facts, and constraints.
+- Added source, confidence, status, and update-time metadata.
+- Added context set, list, show, and remove commands.
+- Added context snapshots to each assistant run record.
+- Verified context can be created, updated, inspected, used during a run, and removed.
+
+## 2026-10-18 — Assistant Phase 5 completed
+
+- Added evidence-linked recommendation records with rationale, benefit, effort, uncertainty, and prerequisites.
+- Added recommendation persistence independent of scientific run evidence.
+- Added accept, reject, and correct review outcomes.
+- Added CLI commands for inspecting and reviewing recommendations.
+- Verified the recommendation lifecycle through the CLI and regression tests.
+
+## 2026-10-18 — Assistant Phase 6 completed
+
+- Added benchmark cases for successful scientific workflows and honest input failure.
+- Added scoring for planning/tool selection, execution status, verification, recommendations, and error categories.
+- Added versioned machine-readable evaluation reports and case-level failure categories.
+- Added evaluation comparison for regression tracking.
+- Verified three benchmark cases with a score of 1.0.
+
+## 2026-10-18 — Assistant Phase 7 completed
+
+- Added controlled comparison of the recommended Michaelis–Menten and Hill candidates.
+- Added fit metrics, uncertainty, AIC, BIC, confidence scores, and scientific rationales.
+- Preserved explicit warnings against treating statistical fit as proof of physical correctness.
+- Verified both candidate formulas converge on the synthetic dataset.
+
+## 2026-10-18 — Optional provider expansion completed
+
+- Added the `AssistantProvider` protocol for replaceable planning providers.
+- Added the deterministic provider as the default tested implementation.
+- Kept provider planning separate from tool execution and scientific computation.
+- Deferred hosted and local language-model integrations until benchmark evidence supports them.
+
+## 2026-10-18 — Provider integration foundation completed
+
+- Added controlled JSON plan ingestion for externally produced provider plans.
+- Added validation for provider metadata, plan steps, and registered-tool boundaries.
+- Added honest provider failure handling and provider identity/version run metadata.
+- Kept the deterministic planner as the default until an external provider passes evaluation.
+
+## 2026-10-18 — Provider integration workflow defined
+
+- Added gated workflow for baseline freeze, provider selection, adapter implementation, validation, private benchmarking, shadow mode, limited activation, and controlled improvement.
+- Confirmed the deterministic planner remains authoritative until an external provider passes the benchmark and human-review gates.
+
+## 2026-10-18 — Local-first provider setup documented
+
+- Documented the current deployment policy: deterministic planning and
+  scientific execution remain local by default.
+- Added the local-first provider setup, configuration contract, activation
+  gates, and security rules.
+- Added architecture and end-to-end Mermaid diagrams showing planning,
+  validated tool execution, verification, reporting, and feedback.
+- Updated the README and status report to distinguish the implemented provider
+  boundary from a model that has actually been installed or approved.
+- Current verification baseline: 78 tests passed, 85.63% coverage, Ruff,
+  mypy, and diff checks passing.
+
+## 2026-10-18 — Advanced robustness fixture added
+
+- Added a nonuniform, noisy, replicated single-condition enzyme-kinetics dataset.
+- Added an extra metadata column to verify the CSV workflow tolerates non-model fields.
+- Verified successful fitting, validation, reporting, and Michaelis–Menten/Hill comparison.
+- Added the fixture to automated private-pilot regression coverage.
+
+## 2026-10-18 — Dataset boundary test completed
+
+- Added an exponential-decay negative-control dataset outside the current enzyme-kinetics scope.
+- Verified structural inspection passes while Michaelis–Menten scientific validation fails with negative R².
+- Added regression coverage to distinguish numerical convergence from model appropriateness.
+
 ## 2026-10-17 — Phase 3 failure handling hardened
 
 - Added solver rejection tests for insufficient observations, insufficient concentration levels, non-finite values, and negative values.

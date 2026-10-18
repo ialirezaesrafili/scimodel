@@ -1,14 +1,14 @@
 # SciModel — Project Status Report
 
 **Review date:** 2026-10-18
-**Repository state:** Private prototype / Phase 5 CLI usability complete
-**Overall status:** Phases 0–6 automated work complete; Phase 7 release preparation in progress
+**Repository state:** Private prototype / local-first provider foundation
+**Overall status:** SciModel engine and assistant Phases 1–7 implemented and verified; provider integration Gates 0–2 complete
 
 ## 1. Executive status
 
 SciModel has completed **Phase 0 — Scope and Test Case Definition**. The scientific domain (Biochemical Reaction Kinetics / Enzyme Catalysis), the baseline model (Michaelis-Menten hyperbolic rate model with non-linear least squares), reference datasets (canonical Puromycin benchmark and synthetic ground-truth dataset), and rigorous acceptance criteria (parameter tolerances, RSS bounds, diagnostics, and unsupported case rules) have been fully specified and approved.
 
-The repository has completed the automated portions of Phases 1–6 and is now preparing for release. Both approved datasets passed the functional, scientific, reproducibility, artifact, and local-only checks. Release preparation has exposed the remaining publication prerequisites: human scientific review, clean artifact installation, maintainer identity, and final legal/security review.
+The repository has completed the scientific engine phases and the first assistant workflow. Both approved datasets pass the functional, scientific, reproducibility, artifact, and local-only checks. The assistant now creates a plan, calls registered tools, verifies the result, saves an audit record, and recommends a next action. Release preparation still requires human scientific, legal, security, and ownership review.
 
 ## 2. Confirmed inventory
 
@@ -17,14 +17,24 @@ The repository has completed the automated portions of Phases 1–6 and is now p
 | Product vision | Defined | `README.md` | Clear scientific principles |
 | Scientific principles | Defined | `README.md` | Transparency, reproducibility, uncertainty, and human review are explicit |
 | Scope & Test Case | **Complete (Phase 0 Exit Gate Passed)** | [`docs/PHASE_0_SCOPE_BRIEF.md`](PHASE_0_SCOPE_BRIEF.md), [`docs/decisions/0001-phase-0-scientific-domain-selection.md`](decisions/0001-phase-0-scientific-domain-selection.md) | Domain, datasets, reference analysis, tolerances, and unsupported cases approved |
-| Reference datasets | **Present** | [`examples/enzyme_kinetics_puromycin.csv`](../examples/enzyme_kinetics_puromycin.csv), [`examples/enzyme_kinetics_synthetic.csv`](../examples/enzyme_kinetics_synthetic.csv), [`examples/README.md`](../examples/README.md) | Canonical benchmark and synthetic ground-truth datasets documented with units and provenance |
+| Reference datasets | **Present** | `examples/`, `examples/README.md` | Puromycin, synthetic ground-truth, advanced replicate, and non-kinetics control fixtures are documented |
 | Python package | Phase 4 workflow implemented | `pyproject.toml`, package modules, and layered boundaries | Scientific workflow is implemented incrementally by phase |
 | CLI | **Complete — Phase 5 exit gate passed** | `src/scimodel/interfaces/cli.py`, `docs/CLI_REFERENCE.md` | Commands, options, output formats, and exit codes are documented |
 | Data ingestion | CSV inspection complete | `src/scimodel/adapters/csv_reader.py`, `src/scimodel/application/inspect_data.py` | CSV reader, kinetics validation, and edge cases are covered by integration tests; Excel deferred by ADR 002 |
 | Scientific model | Michaelis–Menten solver implemented | `src/scimodel/domain/kinetics.py`, `src/scimodel/adapters/scipy_solver.py`, `src/scimodel/application/fit_kinetics.py` | Bounded TRF least squares passes both reference datasets |
 | Validation/reporting | **Complete — Phase 4 exit gate passed** | `src/scimodel/application/validate_kinetics.py`, `src/scimodel/reporting/build_report.py` | Validation, uncertainty, reports, manifests, and coverage gate are verified |
-| Tests/CI | Automated Phase 6 pilot regression added | `tests/`, `.github/workflows/ci.yml`, `pyproject.toml`, `docs/PRIVATE_PILOT_REPORT.md` | 32 tests pass locally; measured coverage is 89%; automated pilot passes |
+| Tests/CI | Automated pilot and assistant evaluation coverage added | `tests/`, `.github/workflows/ci.yml`, `pyproject.toml`, `docs/PRIVATE_PILOT_REPORT.md` | 78 tests pass locally; measured coverage is 85.63%; benchmark suite scores 100% |
 | Release readiness | Phase 7 in progress | `docs/RELEASE_CHECKLIST.md`, `docs/RELEASE_READINESS_REPORT.md`, `CITATION.cff`, `.github/` templates | Wheel build/install passes; publication prerequisites remain open |
+| Assistant orchestration | **Phase 1 complete** | `src/scimodel/application/assistant_workflow.py`, `src/scimodel/domain/assistant.py`, assistant integration tests | Deterministic inspect → validate → report → verify workflow passes |
+| Assistant tool contract | **Phase 2 complete** | Versioned schemas, preflight validation, categorized errors, audit input records | Both approved datasets pass the stable tool contract |
+| Assistant run history | **Phase 3 complete** | `src/scimodel/infrastructure/run_store.py`, history CLI commands | Runs persist, redact sensitive fields, and can be compared |
+| Personal/project context | **Phase 4 complete** | `src/scimodel/infrastructure/context_store.py`, context CLI commands | Context is reviewable, sourced, timestamped, and snapshotted per run |
+| Recommendations | **Phase 5 complete** | `src/scimodel/infrastructure/recommendation_store.py`, recommendation CLI commands | Recommendations are evidence-linked and have reviewable outcomes |
+| Evaluation | **Phase 6 complete** | `src/scimodel/evaluation/`, benchmark CLI commands | Three benchmark cases pass with a 1.0 score |
+| Model comparison | **Phase 7 complete** | `src/scimodel/application/compare_models.py`, `formula compare` command | Explicit candidates can be compared with uncertainty and information criteria |
+| Provider boundary | **Optional expansion complete** | `src/scimodel/domain/provider.py`, `src/scimodel/application/providers.py` | Planning is replaceable without coupling providers to scientific tools |
+| Provider integration workflow | **Gates 0–2 foundation complete** | `docs/PROVIDER_INTEGRATION_WORKFLOW.md`, `docs/LOCAL_FIRST_PROVIDER_SETUP.md` | Local baseline, provider boundary, JSON-plan adapter, and rollout gates are documented |
+| Deployment policy | **Local-first** | `docs/LOCAL_FIRST_PROVIDER_SETUP.md`, `docs/ARCHITECTURE.md` | No model or network provider is enabled; scientific execution remains local |
 | License/release files | Initial policy files present | Apache-2.0 license, contributor, security, and conduct files | Configured |
 
 ## 3. Current phase assessment
@@ -49,7 +59,7 @@ All Phase 0 requirements are satisfied:
 - CLI boundary added with `--help` and `--version`.
 - GitHub Actions workflow added for formatting, linting, type checking, tests, and coverage.
 - Virtual environment is available with Python 3.14.8, pytest, NumPy, SciPy, pandas, and Ruff.
-- Phase 0 through Phase 6 automated tests pass: **32 passed**.
+- Full local verification currently passes: **78 tests passed**, coverage **85.63%**.
 - Ruff lint and format checks pass.
 - Coverage and mypy checks are configured for CI; the current environment now passes strict mypy and the 85% coverage gate.
 - Phase 1 exit evidence: CLI boundary, CI workflow, and package structure are present.
@@ -107,6 +117,86 @@ All Phase 0 requirements are satisfied:
 - Recorded ADR 003: SciPy is the default MVP backend; MATLAB is deferred until a concrete requirement exists.
 - Phase 5 exit gate passed.
 
+### Assistant Phase 1 — Complete (Exit Gate Passed)
+
+- Added a structured task request, plan-step, tool-call, verification, and run-record contract.
+- Added a registered tool boundary for input inspection, model validation, and report generation.
+- Added deterministic inspect-first planning and honest failure recording.
+- Added normal, verbose, and audit CLI modes.
+- Added verification for tool order, tool success, report artifacts, and scientific validation.
+- Added evidence-based recommendations for domain review or failure investigation.
+- Added end-to-end tests for successful, audited, and failed assistant runs.
+- The assistant does not yet use a language-model provider; that is intentionally deferred.
+
+### Assistant Phase 2 — Complete (Exit Gate Passed)
+
+- Added versioned schemas with explicit input and output fields for every registered tool.
+- Added preflight validation for the request objective, CSV path, file existence, and column names.
+- Added categorized errors and honest failed-run records.
+- Added tool versions and exact tool inputs to audit records.
+- Verified both approved datasets against the stable tool contract.
+
+### Assistant Phase 3 — Complete (Exit Gate Passed)
+
+- Added persistent one-record-per-run storage with content-derived run IDs.
+- Added `assistant history`, `assistant show`, and `assistant compare` commands.
+- Added deterministic planner/provider metadata and approval-record fields.
+- Added recursive redaction for common secret-bearing fields before persistence.
+- Verified two real runs can be stored, listed, loaded, and compared.
+
+### Assistant Phase 4 — Complete (Exit Gate Passed)
+
+- Added context items for preferences, facts, and constraints.
+- Added source, confidence, status, and update-time metadata.
+- Added context set, list, show, and remove CLI operations.
+- Added context snapshots to assistant run records.
+- Added explicit update and removal behavior so stored context remains user-controlled.
+
+### Assistant Phase 5 — Complete (Exit Gate Passed)
+
+- Added structured recommendations with evidence, rationale, benefit, effort, uncertainty, and prerequisites.
+- Added recommendation persistence independent of scientific run evidence.
+- Added accepted, rejected, and corrected outcome states.
+- Added CLI commands for listing, inspecting, and reviewing recommendations.
+- Added tests for the complete recommendation review lifecycle.
+
+### Assistant Phase 6 — Complete (Exit Gate Passed)
+
+- Added benchmark cases for successful workflows and honest input failure.
+- Added scoring for status, tool selection, verification, recommendations, and error categories.
+- Added machine-readable evaluation reports with suite and assistant versions.
+- Added failure categorization and evaluation-report comparison.
+- Verified the benchmark suite with three passing cases and a score of 1.0.
+
+### Assistant Phase 7 — Complete (Controlled Extension)
+
+- Added comparison of the recommended Michaelis–Menten and Hill candidates.
+- Added AIC and BIC alongside fit metrics and parameter uncertainty.
+- Preserved candidate formulas, confidence scores, rationales, and limitations.
+- Added a warning that statistical criteria do not establish physical correctness.
+- Verified both candidates converge on the synthetic dataset.
+
+### Optional provider expansion — Complete
+
+- Added an `AssistantProvider` protocol for hosted or local planning providers.
+- Added the tested deterministic provider as the default implementation.
+- Kept provider planning separate from tool execution and scientific computation.
+- Recorded provider name and version in assistant run metadata.
+- Deferred network and local language-model integrations until benchmark evidence supports them.
+
+### Dataset boundary test — Complete
+
+- Added an exponential-decay negative-control dataset outside the current enzyme-kinetics scope.
+- Verified structural inspection can pass while Michaelis–Menten scientific validation fails.
+- Added regression coverage to distinguish numerical convergence from model appropriateness.
+
+### Provider integration foundation — Complete
+
+- Added controlled JSON plan ingestion for externally produced provider plans.
+- Added validation for provider metadata, plan steps, and registered-tool boundaries.
+- Added honest provider failure handling before scientific execution.
+- Kept the deterministic provider as the default fallback.
+
 ## 4. Phase execution plan
 
 | Phase | Purpose | Main work | Required evidence | Current decision |
@@ -123,12 +213,12 @@ All Phase 0 requirements are satisfied:
 
 ## 5. Work remaining, ordered by priority
 
-### P0 — Immediate Next Actions (Phase 6)
+### P0 — Immediate Next Actions (Assistant Phase 7+)
 
-- Run the private pilot with the documented quick-start workflow.
+- Add further model families only with new scientific acceptance criteria.
+- Evaluate optional language-model provider integration against the benchmark suite.
+- Keep public release blockers and domain review separate from feature development.
 - Review scientific outputs with a domain-qualified reviewer.
-- Record pilot usability, privacy, performance, and reproducibility findings.
-- Complete one domain-qualified human review using the quick-start workflow.
 
 ### P0 — Phase 7 release preparation
 
@@ -157,6 +247,6 @@ All Phase 0 requirements are satisfied:
 The project is on track:
 - Phase 0 has an approved scope brief, reference datasets, ADR 001, and reference analysis.
 - Phase 0 acceptance criteria and reference behavior are guarded by automated tests.
-- The current validation baseline is 30 passing tests, 89% measured coverage, and passing Ruff lint/format checks.
-- Phases 1–5 are complete; the automated Phase 6 pilot passes with 32 tests and 89% measured coverage.
-- Phases 0–6 automated gates pass; Phase 7 release preparation is in progress and publication is blocked by documented checklist items.
+- The current validation baseline is 78 passing tests, 86% measured coverage, and passing Ruff lint/format checks.
+- The SciModel engine phases and assistant Phases 1–7 are complete; the automated private pilot, benchmark suite, and controlled model comparison pass.
+- Further expansion and release preparation remain in progress; public publication is blocked by documented checklist items.

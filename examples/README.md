@@ -34,3 +34,25 @@ This directory contains redistributable and synthetic datasets used for testing,
   - Fitted $V_{\max} \in [195.0, 205.0]$
   - Fitted $K_m \in [0.045, 0.055]$
   - $R^2 > 0.99$
+
+## 3. Advanced Replicate Enzyme Kinetics (`enzyme_kinetics_advanced.csv`)
+
+- **Domain:** Biochemical Reaction Kinetics / Controlled In Silico Assay
+- **Origin/Provenance:** Synthetic robustness fixture with nonuniform substrate spacing,
+  replicate measurements, realistic noise, and an extra metadata column.
+- **Permission to use:** Project synthetic fixture (Apache 2.0).
+- **Observations:** 20 rows across 10 distinct concentrations, with two replicates each.
+- **Variables:** `substrate_conc`, `reaction_velocity`, and non-model metadata `replicate`.
+- **Expected Behavior:** The workflow should accept the extra column and repeated
+  concentration levels, converge on a positive fit, and preserve uncertainty and
+  limitations in the generated report.
+
+## 4. Non-Kinetics Negative Control (`non_kinetics_exponential_decay.csv`)
+
+- **Domain:** Exponential decay, intentionally outside the current kinetics scope.
+- **Purpose:** Test whether the assistant reports a poor Michaelis–Menten fit honestly
+  when custom columns are supplied.
+- **Variables:** `time` and `concentration`.
+- **Expected Behavior:** Data inspection should pass structurally, but the current
+  Michaelis–Menten validation should fail or recommend investigation because the
+  response decreases rather than follows the supported increasing saturation model.

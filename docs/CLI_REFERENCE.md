@@ -85,6 +85,115 @@ The output directory contains:
 - `validation.json` — checks and diagnostics.
 - `run_manifest.json` — input hash, configuration, and software metadata.
 
+## Assistant workflow
+
+```bash
+python -m scimodel assistant run examples/enzyme_kinetics_synthetic.csv \
+  --goal "Analyze this enzyme-kinetics dataset and recommend the next action"
+```
+
+The Phase 1 assistant performs the supported workflow in this order:
+
+1. Inspect the input data.
+2. Fit and validate the Michaelis–Menten model.
+3. Build the reproducible report bundle.
+4. Verify the tool trace, scientific validation, and required artifacts.
+5. Return a recommendation based on the verified result.
+
+Use `--mode verbose` to print the structured plan. Use `--mode audit` to save
+`assistant_run.json` alongside the report artifacts. The assistant currently
+uses a deterministic rule-based planner; a replaceable language-model provider
+is a later phase.
+
+Assistant tool calls use versioned schemas and record their input fields,
+status, output, and categorized errors (`request`, `input`, `scientific`,
+`filesystem`, or `unexpected`). The current tools are version `1.0`. Invalid
+requests are rejected before scientific execution begins.
+
+Phase 3 also persists every assistant run in `.scimodel/runs` by default:
+
+```bash
+python -m scimodel assistant history
+python -m scimodel assistant show RUN_ID
+python -m scimodel assistant compare FIRST_RUN_ID SECOND_RUN_ID
+```
+
+Use `--history-dir PATH` to select another store. Records include the
+deterministic planner/provider metadata and approval records. Sensitive values
+under common secret-bearing keys are redacted before persistence.
+
+## Personal and project context
+
+```bash
+python -m scimodel assistant context set project_domain "enzyme kinetics" \
+  --kind fact --source "Phase 0 scope brief"
+python -m scimodel assistant context list
+python -m scimodel assistant context show project_domain
+python -m scimodel assistant context remove project_domain
+```
+
+Context items are classified as `preference`, `fact`, or `constraint`, and
+carry source, confidence, status, and update-time metadata. Each assistant run
+stores the context snapshot used for that run. Context is user-controlled and
+can be updated or removed explicitly.
+
+## Recommendation review
+
+```bash
+python -m scimodel assistant recommendation list
+python -m scimodel assistant recommendation show RECOMMENDATION_ID
+python -m scimodel assistant recommendation accept RECOMMENDATION_ID --reason "Reviewed"
+python -m scimodel assistant recommendation reject RECOMMENDATION_ID --reason "Not applicable"
+python -m scimodel assistant recommendation correct RECOMMENDATION_ID \
+  --action collect_more_data --reason "Need independent replicates"
+```
+
+Recommendations include evidence references, rationale, expected benefit,
+effort, uncertainty, prerequisites, and review status. Review outcomes are
+stored separately from the original run so scientific evidence remains intact.
+
+## Evaluation and regression comparison
+
+```bash
+python -m scimodel assistant evaluate --output-dir reports/evaluation
+python -m scimodel assistant evaluate --compare \
+  reports/evaluation-a/evaluation.json reports/evaluation-b/evaluation.json
+```
+
+The benchmark suite scores expected status, tool selection, verification,
+recommendation quality, and categorized failure handling. The report records
+the suite version, assistant version, per-case checks, failure categories, and
+aggregate score.
+
+## Model comparison
+
+```bash
+python -m scimodel formula compare examples/enzyme_kinetics_synthetic.csv \
+  --objective "enzyme kinetics"
+```
+
+This compares recommended formulas with fit metrics, uncertainty, AIC, BIC,
+confidence scores, and scientific rationales. It reports candidates without
+silently selecting a model. A lower information criterion is not proof of
+physical correctness.
+
+The assistant also exposes a replaceable provider contract internally. The
+current provider is the deterministic rule-based planner; hosted and local
+language-model providers remain optional future implementations and must pass
+the benchmark suite before being enabled.
+
+For controlled provider integration, supply a validated external plan:
+
+```bash
+python -m scimodel assistant run DATA.csv \
+  --goal "Analyze this dataset" \
+  --provider-plan provider-plan.json
+```
+
+The JSON plan must contain `provider`, `version`, and `steps`. Each step must
+declare `step_id`, `tool`, `purpose`, and `verification`. Malformed plans and
+unknown tools are rejected before scientific execution.
+
 ## Exit codes
 
 | Code | Meaning |

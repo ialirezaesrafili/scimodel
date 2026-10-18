@@ -41,6 +41,8 @@ For the detailed execution plan and evidence-based progress tracking, see:
 - [End-to-End Project Roadmap](docs/SciModel_End_to_End_Project_Roadmap.md)
 - [Project Status Report](docs/PROJECT_STATUS_REPORT.md)
 - [Architecture Guide](docs/ARCHITECTURE.md)
+- [Local-First Provider Setup](docs/LOCAL_FIRST_PROVIDER_SETUP.md)
+- [Provider Integration Workflow](docs/PROVIDER_INTEGRATION_WORKFLOW.md)
 - [Development Guide](docs/DEVELOPMENT.md)
 - [CLI Reference](docs/CLI_REFERENCE.md)
 
@@ -85,9 +87,19 @@ python -m scimodel formula fit examples/enzyme_kinetics_puromycin.csv \
 # 4. Validate model assumptions and generate full reproducible reports
 python -m scimodel model validate examples/enzyme_kinetics_puromycin.csv
 python -m scimodel report build examples/enzyme_kinetics_puromycin.csv --output-dir reports/run-001
+
+# 5. Run the Phase 1 assistant workflow with an audit record
+python -m scimodel assistant run examples/enzyme_kinetics_puromycin.csv \
+  --goal "Analyze this enzyme-kinetics dataset and recommend the next action" \
+  --mode audit --output-dir reports/assistant-run
 ```
 
 See the [CLI Reference](docs/CLI_REFERENCE.md) for command contracts and exit codes.
+
+The assistant currently uses a deterministic plan and the verified SciModel
+tools. It inspects the input, validates the model, builds a reproducible report,
+verifies the result, and recommends the next action. Provider integration is
+local-first and opt-in; no hosted or local language model is enabled yet.
 
 ## Long-term vision
 
