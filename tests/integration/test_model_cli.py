@@ -97,3 +97,69 @@ def test_end_to_end_simple_task_workflow(
     assert build_out["valid"] is True
     assert (report_dir / "report.md").is_file()
     assert (report_dir / "run_manifest.json").is_file()
+
+
+def test_formula_recommend_cli(capsys: pytest.CaptureFixture[str]) -> None:
+    """CLI 'formula recommend' emits candidate formulas with confidence scores."""
+    assert main(["formula", "recommend", str(PUROMYCIN_CSV), "--objective", "enzyme kinetics"]) == 0
+
+    recs = json.loads(capsys.readouterr().out)
+    assert len(recs) >= 1
+    assert recs[0]["formula_name"] == "michaelis_menten"
+    assert "Vmax" in recs[0]["parameters"]
+    assert recs[0]["confidence_score"] > 0.8
+
+
+def test_formula_fit_cli_scipy(capsys: pytest.CaptureFixture[str]) -> None:
+    """CLI 'formula fit' optimizes arbitrary formulas using SciPy backend."""
+    cmd = [
+        "formula",
+        "fit",
+        str(PUROMYCIN_CSV),
+        "--formula",
+        "(Vmax * substrate_conc) / (Km + substrate_conc)",
+        "--backend",
+        "scipy",
+    ]
+    assert main(cmd) == 0
+
+    result = json.loads(capsys.readouterr().out)
+    assert result["converged"] is True
+    assert abs(result["parameters"]["Vmax"] - 212.68) < 1.0
+    assert abs(result["parameters"]["Km"] - 0.064) < 0.01
+
+
+def test_formula_fit_cli_matlab_fallback(capsys: pytest.CaptureFixture[str]) -> None:
+    """CLI 'formula fit --backend matlab --fallback-to-scipy' succeeds via SciPy."""
+    cmd = [
+        "formula",
+        "fit",
+        str(PUROMYCIN_CSV),
+        "--formula",
+        "(Vmax * substrate_conc) / (Km + substrate_conc)",
+        "--backend",
+        "matlab",
+        "--fallback-to-scipy",
+    ]
+    assert main(cmd) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["converged"] is True
+
+
+def test_formula_fit_cli_matlab_unavailable(capsys: pytest.CaptureFixture[str]) -> None:
+    """CLI 'formula fit --backend matlab' exits with code 2 when MATLAB engine is not installed."""
+    cmd = [
+        "formula",
+        "fit",
+        str(PUROMYCIN_CSV),
+        "--formula",
+        "(Vmax * substrate_conc) / (Km + substrate_conc)",
+        "--backend",
+        "matlab",
+    ]
+    with pytest.raises(SystemExit) as raised:
+        main(cmd)
+
+    assert raised.value.code == 2
+    err_msg = capsys.readouterr().err
+    assert "MATLAB Engine API for Python is not installed" in err_msg

@@ -70,7 +70,19 @@ The architecture boundaries are configured, and the Phase 0 reference datasets, 
 ## Quick start
 
 ```bash
+# 1. Inspect data quality
 python -m scimodel data inspect examples/enzyme_kinetics_puromycin.csv
+
+# 2. Get formula recommendations based on data and research objectives
+python -m scimodel formula recommend examples/enzyme_kinetics_puromycin.csv --objective "enzyme kinetics"
+
+# 3. Fit an extensible formula with SciPy (or MATLAB adapter)
+python -m scimodel formula fit examples/enzyme_kinetics_puromycin.csv \
+  --formula "(Vmax * substrate_conc) / (Km + substrate_conc)" \
+  --params "Vmax:0:inf,Km:0:inf" \
+  --backend scipy
+
+# 4. Validate model assumptions and generate full reproducible reports
 python -m scimodel model validate examples/enzyme_kinetics_puromycin.csv
 python -m scimodel report build examples/enzyme_kinetics_puromycin.csv --output-dir reports/run-001
 ```

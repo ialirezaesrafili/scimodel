@@ -36,6 +36,42 @@ python -m scimodel model validate DATA.csv
 
 This runs the fit and returns explicit convergence, goodness-of-fit, physical-parameter, monotonicity, and residual-diagnostic results.
 
+## Formula recommendations
+
+```bash
+python -m scimodel formula recommend DATA.csv --objective "enzyme kinetics"
+```
+
+Suggests candidate mathematical formulas based on data profiles and research objectives (e.g., enzyme kinetics, exponential decay). Returns a JSON list of candidate formulas, expressions, parameters, confidence scores, scientific rationales, and underlying physical assumptions.
+
+Supported arguments:
+- `path` — Path to CSV dataset.
+- `--objective` — Scientific research objective (default: `"enzyme kinetics"`).
+- `--x-column` — Independent variable column name (default: `substrate_conc`).
+- `--y-column` — Dependent variable column name (default: `reaction_velocity`).
+
+## Extensible formula fitting (SciPy & MATLAB)
+
+```bash
+python -m scimodel formula fit DATA.csv \
+  --formula "(Vmax * substrate_conc) / (Km + substrate_conc)" \
+  --params "Vmax:0:inf,Km:0:inf" \
+  --backend scipy
+```
+
+Fits an arbitrary mathematical expression against experimental data using either the zero-dependency open-source SciPy solver or an external MATLAB engine session.
+
+Supported arguments:
+- `path` — Path to CSV dataset.
+- `--formula` — Mathematical expression parsed and evaluated via safe AST validation (operators `+`, `-`, `*`, `/`, `**` and functions `exp`, `log`, `log10`, `sqrt`, `sin`, `cos`, `tanh`, `abs`).
+- `--params` — Optional parameter specifications formatted as `name:min:max` or `name:min:max:init` (e.g. `"Vmax:0:inf,Km:0:inf"`).
+- `--backend` — Optimization engine (`scipy` [default] or `matlab`).
+- `--fallback-to-scipy` — If `--backend matlab` is chosen but MATLAB is not installed or unlicensed, gracefully fall back to SciPy.
+- `--x-column` — Independent variable column name (default: `substrate_conc`).
+- `--y-column` — Dependent variable column name (default: `reaction_velocity`).
+
+The command returns parameter estimates, asymptotic standard errors, 95% confidence intervals, and fit metrics ($R^2$, RMSE, AIC, BIC).
+
 ## Report generation
 
 ```bash
