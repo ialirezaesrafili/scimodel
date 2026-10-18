@@ -7,7 +7,7 @@ name = "scimodel"
 version = "0.1.0.dev0"
 description = "A transparent and reproducible scientific modeling assistant."
 readme = "README.md"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 license = { file = "LICENSE" }
 authors = [{ name = "SciModel contributors" }]
 classifiers = [
@@ -18,11 +18,15 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Scientific/Engineering",
 ]
-dependencies = []
+dependencies = [
+  "numpy>=2.1,<3",
+  "scipy>=1.14,<2",
+]
 
 [project.optional-dependencies]
 dev = [
   "mypy>=1.15,<2",
+  "pandas>=2.2,<4",
   "pytest>=8.3,<9",
   "pytest-cov>=6,<7",
   "ruff>=0.9,<1",
@@ -40,10 +44,24 @@ scimodel = "scimodel.interfaces.cli:main"
 packages = ["src/scimodel"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/docs", "/README.md", "/LICENSE", "/pyproject.toml"]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/examples",
+  "/README.md",
+  "/LICENSE",
+  "/CITATION.cff",
+  "/CONTRIBUTING.md",
+  "/SECURITY.md",
+  "/CODE_OF_CONDUCT.md",
+  "/CHANGELOG.md",
+  "/pyproject.toml",
+]
 
 [tool.pytest.ini_options]
 addopts = ["--strict-config", "--strict-markers"]
+pythonpath = ["src"]
 testpaths = ["tests"]
 
 [tool.ruff]
@@ -58,14 +76,18 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 known-first-party = ["scimodel"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
+follow_imports = "skip"
+ignore_missing_imports = true
 packages = ["scimodel"]
 mypy_path = "src"
 
 [tool.coverage.run]
 branch = true
 source = ["scimodel"]
+omit = ["src/scimodel/__main__.py"]
 
 [tool.coverage.report]
+fail_under = 85
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]
