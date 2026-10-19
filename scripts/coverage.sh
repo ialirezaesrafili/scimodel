@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Write coverage reports for Python and Go to coverage/ and print the totals.
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 out="$ROOT_DIR/coverage"
 mkdir -p "$out"
 

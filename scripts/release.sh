@@ -3,8 +3,9 @@
 #   scripts/release.sh            dry run (no tag)
 #   scripts/release.sh --tag      create an annotated git tag v<version>
 # Pushing the tag (git push origin v<version>) triggers .github/workflows/release.yml.
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 
 create_tag=0
 [[ "${1:-}" == "--tag" ]] && create_tag=1

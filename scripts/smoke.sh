@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # End-to-end smoke test: regenerate example data, run discovery on every example, check results.
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
@@ -11,7 +12,9 @@ git diff --quiet -- examples/*.csv 2>/dev/null || warn "regenerated examples dif
 
 scimodel=("$(python_bin)" -m scimodel)
 "${scimodel[@]}" scan examples >/dev/null
+count=0
 for dataset in examples/*.csv; do
+  count=$((count + 1))
   name="$(basename "$dataset" .csv)"
   log "discover $name"
   "${scimodel[@]}" discover "$dataset" --json --time-budget 5 --output-dir "$work/$name" \
@@ -25,4 +28,4 @@ assert result["quality"][result["best"]]["grade"] in "ABC", "best model graded D
 print(f"   best={result['best']} R2={best['fit']['metrics']['r_squared']:.4f}")
 PY
 done
-ok "Smoke test passed for $(ls examples/*.csv | wc -l) datasets"
+ok "Smoke test passed for $count datasets"

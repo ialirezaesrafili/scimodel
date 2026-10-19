@@ -5,7 +5,10 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV_DIR="${SCIMODEL_VENV:-$ROOT_DIR/.venv}"
+# Used by the scripts that source this file.
+# shellcheck disable=SC2034
 BATCH_DIR="$ROOT_DIR/batch"
+# shellcheck disable=SC2034
 BIN_DIR="$ROOT_DIR/bin"
 
 if [[ -t 1 ]]; then

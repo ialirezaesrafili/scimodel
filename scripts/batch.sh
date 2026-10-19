@@ -2,6 +2,7 @@
 # Analyze every dataset under a folder in parallel with the Go batch runner.
 #   scripts/batch.sh [folder] [scimodel-batch flags...]
 #   scripts/batch.sh ~/lab-data -workers 8 -timeout 5m -args "--time-budget 30"
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 folder="${1:-.}"

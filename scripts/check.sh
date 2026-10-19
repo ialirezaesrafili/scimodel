@@ -3,8 +3,9 @@
 #   scripts/check.sh            everything (Python, Go, shell)
 #   scripts/check.sh python     Python only     scripts/check.sh go      Go only
 #   scripts/check.sh shell      shell scripts only
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 
 target="${1:-all}"
 
@@ -20,7 +21,7 @@ check_python() {
 check_go() {
   require_go
   (
-    cd "$BATCH_DIR"
+    cd "$BATCH_DIR" || exit 1
     log "gofmt"
     unformatted="$(gofmt -l .)"
     [[ -z "$unformatted" ]] || die "gofmt needed for: $unformatted"

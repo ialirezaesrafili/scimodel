@@ -3,8 +3,9 @@
 #   scripts/build.sh              wheel, sdist, and a native Go binary in bin/
 #   scripts/build.sh --go-only    only the native Go binary
 #   scripts/build.sh --cross      also cross-compile Go for linux/darwin/windows (amd64, arm64)
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || exit 1
 
 go_only=0 cross=0
 for arg in "$@"; do

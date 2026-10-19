@@ -2,6 +2,7 @@
 # Create the development environment: Python venv with all extras, Go batch binary, git hooks.
 #   scripts/setup.sh            full setup
 #   scripts/setup.sh --no-go    skip the Go batch runner
+# shellcheck source=scripts/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 with_go=1
@@ -25,7 +26,7 @@ if [[ ! -x "$VENV_DIR/bin/python" ]]; then
 fi
 log "Installing SciModel (editable) with development and optional extras"
 "$VENV_DIR/bin/python" -m pip install --quiet --upgrade pip
-"$VENV_DIR/bin/python" -m pip install --quiet -e "$ROOT_DIR[dev,all]"
+"$VENV_DIR/bin/python" -m pip install --quiet -e "${ROOT_DIR}[dev,all]"
 ok "Python environment ready ($("$VENV_DIR/bin/python" --version))"
 
 if (( with_go )); then
