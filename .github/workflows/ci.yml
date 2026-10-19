@@ -5,34 +5,72 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  quality:
+  python:
+    name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+      - name: Install
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Quality gate (format, lint, strict typing, tests, coverage ≥ 85%)
+        run: scripts/check.sh python
 
-      - name: Install project and development dependencies
-        run: python -m pip install --upgrade pip && python -m pip install ".[dev]"
+  go:
+    name: Go batch runner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: batch/go.mod
+          cache-dependency-path: batch/go.mod
+      - name: gofmt, vet, race tests
+        run: scripts/check.sh go
 
-      - name: Check formatting
-        run: ruff format --check .
+  shell:
+    name: Shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - run: scripts/check.sh shell
 
-      - name: Lint
-        run: ruff check .
-
-      - name: Type check
-        run: mypy
-
-      - name: Test
-        run: pytest --cov=scimodel --cov-report=term-missing --cov-fail-under=85
+  smoke:
+    name: End-to-end smoke test
+    needs: [python, go]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: batch/go.mod
+      - name: Install
+        run: python -m pip install -e ".[plots,excel]"
+      - name: Discover every example dataset
+        run: scripts/smoke.sh
+      - name: Parallel batch run with the Go runner
+        run: |
+          scripts/build.sh --go-only
+          bin/scimodel-batch -root examples -out "$RUNNER_TEMP/batch" -workers 4 -args "--time-budget 5"
+          cat "$RUNNER_TEMP/batch/batch_summary.md" >> "$GITHUB_STEP_SUMMARY"

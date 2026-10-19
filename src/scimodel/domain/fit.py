@@ -23,6 +23,7 @@ class FitResult:
     converged: bool
     function_evaluations: int
     observations: int
+    parameter_correlation: dict[str, dict[str, float]] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serializable result representation."""

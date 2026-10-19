@@ -43,6 +43,10 @@ def translate_formula_to_matlab(formula: ModelFormula) -> str:
     expr = re.sub(r"(?<!\.)\*", ".*", expr)
     expr = re.sub(r"(?<!\.)\/", "./", expr)
 
+    # Map NumPy function names onto their MATLAB equivalents.
+    for numpy_name, matlab_name in (("arctan", "atan"),):
+        expr = re.sub(rf"\b{numpy_name}\(", f"{matlab_name}(", expr)
+
     # Substitute parameters with 1-indexed vector indexing p(1), p(2), ...
     for idx, param in enumerate(formula.parameters, start=1):
         expr = re.sub(rf"\b{re.escape(param.name)}\b", f"p({idx})", expr)

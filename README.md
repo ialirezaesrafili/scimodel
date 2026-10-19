@@ -1,106 +1,107 @@
 # SciModel
 
-**From experimental data to reliable scientific models.**
+**Find the equation behind your data, and know how far to trust it.**
 
-SciModel is an open-source scientific modeling assistant designed to help master's students, PhD candidates, laboratory researchers, and independent scientific innovators transform experimental data into scientifically justified, validated, and reproducible mathematical models.
+SciModel is an open-source command-line assistant for scientists. Run it in a folder of
+experimental data. It reads the files and profiles them, then suggests what you can do. It
+searches established scientific laws, sparse regression, symbolic regression, and
+(optionally) AI-proposed hypotheses for the equation that explains your measurements. Each
+candidate is graded with a battery of statistical checks. You get a reproducible report
+written for your level of expertise.
 
-The project addresses a common challenge in scientific research: researchers often collect valuable experimental data but lack a clear, systematic workflow for choosing appropriate mathematical models, estimating parameters, evaluating assumptions, validating results, and determining the next steps in their analysis.
+```text
+$ cd ~/lab/catalysis && scimodel
+Found 1 dataset(s):
+  1) catalysis_arrhenius.csv — 64 rows; temperature, catalyst_loading, replicate, rate
+I think the response is 'rate' and the candidate explanatory variable(s) are temperature, catalyst_loading.
+  • 1 missing value(s); affected rows are excluded from fits. [rate]
+  • temperature → rate: monotonic increasing, accelerating, exponential like
 
-SciModel aims to make this process more accessible through a command-line interface that combines scientific data analysis, mathematical modeling, numerical computation, and evidence-based model evaluation.
+scimodel> how does rate depend on temperature and catalyst_loading
+Best model: sparse_log_4  (sparse)
+  rate = exp(w0 + w1*(1/temperature) + w2*log(catalyst_loading))
+    w1 = -6941.4 ± 78      ← Arrhenius: Ea = −w1·R = 57.7 kJ/mol
+    w2 = 0.806 ± 0.010     ← reaction order in catalyst
+  R² = 0.9977, cross-validated R² = 0.9969
+  Quality grade A (88/100)
+Report written to scimodel_reports/catalysis_arrhenius-20261019-103252/report.md
+```
 
-## Project goals
+## Why SciModel
 
-- Inspect experimental datasets and identify potential data-quality issues.
-- Guide researchers in selecting suitable mathematical, statistical, and computational models.
-- Support model fitting, parameter estimation, numerical optimization, and equation discovery where appropriate.
-- Evaluate model performance, uncertainty, assumptions, and limitations.
-- Provide transparent explanations for modeling recommendations.
-- Preserve code, configurations, parameters, and results for reproducible research.
-- Support extensible scientific solver backends, with Python as the primary scientific engine and optional MATLAB integration.
+- **Works on your data as it is.** It reads CSV, TSV, delimited text, JSON, Excel, and
+  Parquet. Units in headers (`temperature [K]`), missing values, replicates, metadata columns,
+  and decimal commas are all handled. Source values are never modified.
+- **Discovers equations, not just fits them.** About 20 mechanistic and empirical model
+  families run alongside sparse regression and genetic-programming symbolic regression. A
+  neural network serves as a learnable-signal ceiling. It rediscovers Kepler's third law,
+  the Arrhenius law, and Gompertz growth from data (see the
+  [benchmarks](docs/how-it-works.md#validation-benchmarks)).
+- **Honest model selection.** Candidates are ranked by search-adjusted AICc with Akaike
+  weights, a parsimony guard, and cross-validation. Statistically tied candidates are shown
+  as tied.
+- **Quality you can read.** Up to 14 checks cover residual structure, lack of fit against
+  replicates, identifiability, outliers, plausibility, and the neural ceiling. Each check
+  comes with a plain-language explanation and an A–D grade.
+- **For every level.** Novice, intermediate, and expert modes change the explanations, not
+  the science.
+- **AI that cannot invent results.** Claude or a local Ollama model can propose hypotheses
+  and explain results. Every proposed formula passes an AST safety whitelist and is fitted
+  locally. By default the model sees only summary statistics.
+- **Scales to a whole lab.** A Go batch runner analyzes hundreds of datasets in parallel,
+  incrementally.
+- **Reproducible.** Every run records input SHA-256, settings, seed, and software versions.
 
-## Development approach
+## Install
 
-The initial release will focus on a Python-based command-line interface and a small, testable scientific workflow. The first objective is to establish a reliable end-to-end process for inspecting experimental data, fitting an appropriate model, evaluating its limitations, and generating reproducible outputs.
+```bash
+pip install "scimodel[all]"        # core + Claude + plots + Excel
+# or a minimal install: pip install scimodel
+```
 
-MATLAB integration and more advanced scientific capabilities will be introduced when specific research workflows justify them.
+From source, with the full developer toolchain (Python, Go, Bash):
+
+```bash
+git clone https://github.com/REPLACE_WITH_OWNER/scimodel && cd scimodel
+scripts/setup.sh
+```
+
+## Use
+
+```bash
+scimodel                                  # interactive assistant in the current folder
+scimodel scan ~/lab                       # which files can be analyzed?
+scimodel suggest data.csv                 # what can I do with this dataset?
+scimodel discover data.csv --target rate --predictors temperature,loading
+scimodel discover data.csv --formula "Vmax*s/(K + s)"   # test your own hypothesis
+scripts/batch.sh ~/lab -workers 8         # every dataset, in parallel
+```
+
+Optional AI assistance (never required):
+
+```bash
+scimodel config set llm_provider anthropic    # uses ANTHROPIC_API_KEY or `ant auth login`
+scimodel config set llm_provider ollama       # fully local; no data leaves the machine
+```
+
+## Documentation
+
+| Guide | For |
+|---|---|
+| [Getting started](docs/getting-started.md) | Installing, your first session, reading a report |
+| [How it works](docs/how-it-works.md) | The discovery pipeline, ranking, quality checks, AI guardrails, benchmarks |
+| [CLI reference](docs/cli-reference.md) | Every command, option, setting, and exit code |
+| [Architecture](docs/architecture.md) | Layers, components, the Python/Go/Bash split, extension points |
+| [Development](docs/development.md) | Workflow scripts, testing, coverage, releasing |
+| [Decision records](docs/decisions/) | Why things are the way they are |
 
 ## Scientific principles
 
-SciModel prioritizes scientific transparency, reproducibility, appropriate model selection, and honest reporting of uncertainty.
+SciModel supports scientific reasoning; it does not replace it. A good fit does not prove a
+mechanism. Every report states its assumptions and limitations. When the data cannot
+separate competing models, SciModel says so and suggests an experiment that could.
 
-The application is intended to support scientific reasoning rather than replace it. Automated recommendations must be evaluated against the available evidence, and the software must clearly communicate when the data are insufficient to support a reliable conclusion.
+## License and citation
 
-## Project status
-
-Early development — private prototype.
-
-The initial release is intended for testing and evaluation before the project is made publicly available.
-
-For the detailed execution plan and evidence-based progress tracking, see:
-
-- [End-to-End Project Roadmap](docs/SciModel_End_to_End_Project_Roadmap.md)
-- [Project Status Report](docs/PROJECT_STATUS_REPORT.md)
-- [Architecture Guide](docs/ARCHITECTURE.md)
-- [Local-First Provider Setup](docs/LOCAL_FIRST_PROVIDER_SETUP.md)
-- [Provider Integration Workflow](docs/PROVIDER_INTEGRATION_WORKFLOW.md)
-- [Development Guide](docs/DEVELOPMENT.md)
-- [CLI Reference](docs/CLI_REFERENCE.md)
-
-## Repository structure
-
-```text
-scimodel/
-├── src/scimodel/
-│   ├── domain/          # Scientific concepts and invariants
-│   ├── application/     # Use cases and ports
-│   ├── adapters/        # External-to-domain translations
-│   ├── infrastructure/  # Filesystem, config, persistence, integrations
-│   └── interfaces/      # CLI and presentation boundaries
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── scientific/
-├── examples/             # Synthetic or redistributable examples only
-├── data/                 # Data policy and local-data boundary
-├── docs/
-├── pyproject.toml
-└── LICENSE
-```
-
-The architecture boundaries are configured, and the Phase 0 reference datasets, data-inspection workflow, and initial scientific fitting workflow are present. Further capabilities will be added phase by phase while preserving these boundaries.
-
-## Quick start
-
-```bash
-# 1. Inspect data quality
-python -m scimodel data inspect examples/enzyme_kinetics_puromycin.csv
-
-# 2. Get formula recommendations based on data and research objectives
-python -m scimodel formula recommend examples/enzyme_kinetics_puromycin.csv --objective "enzyme kinetics"
-
-# 3. Fit an extensible formula with SciPy (or MATLAB adapter)
-python -m scimodel formula fit examples/enzyme_kinetics_puromycin.csv \
-  --formula "(Vmax * substrate_conc) / (Km + substrate_conc)" \
-  --params "Vmax:0:inf,Km:0:inf" \
-  --backend scipy
-
-# 4. Validate model assumptions and generate full reproducible reports
-python -m scimodel model validate examples/enzyme_kinetics_puromycin.csv
-python -m scimodel report build examples/enzyme_kinetics_puromycin.csv --output-dir reports/run-001
-
-# 5. Run the Phase 1 assistant workflow with an audit record
-python -m scimodel assistant run examples/enzyme_kinetics_puromycin.csv \
-  --goal "Analyze this enzyme-kinetics dataset and recommend the next action" \
-  --mode audit --output-dir reports/assistant-run
-```
-
-See the [CLI Reference](docs/CLI_REFERENCE.md) for command contracts and exit codes.
-
-The assistant currently uses a deterministic plan and the verified SciModel
-tools. It inspects the input, validates the model, builds a reproducible report,
-verifies the result, and recommends the next action. Provider integration is
-local-first and opt-in; no hosted or local language model is enabled yet.
-
-## Long-term vision
-
-To build a community-driven scientific modeling platform that helps researchers across disciplines move from experimental observations to better-founded mathematical models and reproducible scientific discoveries.
+Apache-2.0. If SciModel contributes to your work, please cite it using
+[`CITATION.cff`](CITATION.cff).

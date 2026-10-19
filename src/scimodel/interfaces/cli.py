@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from collections.abc import Sequence
 from dataclasses import asdict
 from pathlib import Path
@@ -28,11 +29,12 @@ from scimodel.application.recommender import RuleBasedFormulaRecommender
 from scimodel.application.validate_kinetics import validate_csv
 from scimodel.domain.assistant import TaskRequest
 from scimodel.domain.fit import ModelFitError
-from scimodel.domain.formula import _ALLOWED_FUNCTIONS, ModelFormula, ParameterSpec
+from scimodel.domain.formula import RESERVED_NAMES, ModelFormula, ParameterSpec
 from scimodel.evaluation.runner import compare_evaluations, evaluate_suite, save_evaluation
 from scimodel.infrastructure.context_store import ContextStore
 from scimodel.infrastructure.recommendation_store import RecommendationStore
 from scimodel.infrastructure.run_store import RunStore, compare_runs
+from scimodel.interfaces import commands
 from scimodel.reporting.build_report import build_csv_report
 
 
@@ -51,7 +53,7 @@ def parse_parameter_specs(
         return specs
 
     tokens = set(re.findall(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b", expression))
-    reserved = set(_ALLOWED_FUNCTIONS.keys()) | {independent_var}
+    reserved = set(RESERVED_NAMES) | {independent_var}
     param_names = sorted(tokens - reserved)
     return [ParameterSpec(name, lower_bound=0.0, upper_bound=float("inf")) for name in param_names]
 
@@ -60,7 +62,10 @@ def build_parser() -> argparse.ArgumentParser:
     """Build the top-level SciModel argument parser."""
     parser = argparse.ArgumentParser(
         prog="scimodel",
-        description="A transparent and reproducible scientific modeling assistant.",
+        description=(
+            "A transparent and reproducible scientific modeling assistant. Run 'scimodel' "
+            "(or 'scimodel start') inside a folder with data for the interactive assistant."
+        ),
     )
     parser.add_argument(
         "--version",
@@ -69,6 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show the installed SciModel version and exit.",
     )
     subparsers = parser.add_subparsers(dest="command")
+    commands.register(subparsers)
 
     # data inspect
     data_parser = subparsers.add_parser("data", help="Inspect scientific data inputs.")
@@ -256,7 +262,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the SciModel CLI and return a process exit code."""
     parser = build_parser()
+    if argv is None and len(sys.argv) == 1 and sys.stdin.isatty() and sys.stdout.isatty():
+        argv = ["start"]
     arguments = parser.parse_args(argv)
+
+    if arguments.command in commands.COMMANDS:
+        return commands.handle(arguments, parser)
 
     if arguments.command == "data" and arguments.data_command == "inspect":
         try:

@@ -4,19 +4,26 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scimodel"
-version = "0.1.0.dev0"
-description = "A transparent and reproducible scientific modeling assistant."
+version = "1.0.0rc1"
+description = "Open-source scientific modeling assistant: discover, validate, and report the equations behind experimental data."
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
 license = { file = "LICENSE" }
 authors = [{ name = "SciModel contributors" }]
+keywords = ["scientific modeling", "equation discovery", "symbolic regression", "curve fitting", "model selection", "reproducibility", "llm"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Education",
   "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
 ]
 dependencies = [
   "numpy>=2.1,<3",
@@ -24,8 +31,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+claude = ["anthropic>=1.10,<2"]
+plots = ["matplotlib>=3.9,<4"]
+excel = ["openpyxl>=3.1,<4"]
+all = ["scimodel[claude,plots,excel]"]
 dev = [
+  "matplotlib>=3.9,<4",
   "mypy>=1.15,<2",
+  "openpyxl>=3.1,<4",
   "pandas>=2.2,<4",
   "pytest>=8.3,<9",
   "pytest-cov>=6,<7",
@@ -47,6 +60,8 @@ packages = ["src/scimodel"]
 include = [
   "/src",
   "/tests",
+  "/batch",
+  "/scripts",
   "/docs",
   "/examples",
   "/README.md",

@@ -36,3 +36,12 @@ reports/generated/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# SciModel run output and build artifacts
+scimodel_reports/
+coverage/
+bin/
+batch/scimodel-batch
+.scimodel/runs/
+.scimodel/recommendations/
+.scimodel/context/

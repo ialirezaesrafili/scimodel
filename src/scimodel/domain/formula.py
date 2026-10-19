@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, cast
@@ -55,14 +56,26 @@ _ALLOWED_UNARYOPS: Mapping[type[ast.unaryop], Callable[[Any], Any]] = {
 
 _ALLOWED_FUNCTIONS: Mapping[str, Callable[..., Any]] = {
     "exp": np.exp,
+    "expm1": np.expm1,
     "log": np.log,
     "log10": np.log10,
+    "log2": np.log2,
+    "log1p": np.log1p,
     "sqrt": np.sqrt,
     "sin": np.sin,
     "cos": np.cos,
+    "tan": np.tan,
+    "arctan": np.arctan,
+    "sinh": np.sinh,
+    "cosh": np.cosh,
     "tanh": np.tanh,
     "abs": np.abs,
 }
+
+# Named mathematical constants that may appear in expressions without being parameters.
+_ALLOWED_CONSTANTS: Mapping[str, float] = {"pi": math.pi}
+
+RESERVED_NAMES: frozenset[str] = frozenset(_ALLOWED_FUNCTIONS) | frozenset(_ALLOWED_CONSTANTS)
 
 
 @dataclass(frozen=True)
@@ -96,6 +109,7 @@ class ModelFormula:
             {p.name for p in self.parameters}
             | set(self.independent_vars)
             | set(_ALLOWED_FUNCTIONS.keys())
+            | set(_ALLOWED_CONSTANTS.keys())
         )
 
         for node in ast.walk(tree):
@@ -119,7 +133,24 @@ class ModelFormula:
             msg = f"Unsupported AST syntax node '{type(node).__name__}' in formula expression."
             raise FormulaSyntaxError(msg)
 
+        # Cache the validated tree; the dataclass is frozen, so bypass __setattr__.
+        object.__setattr__(self, "_tree", tree)
         return tree
+
+    @property
+    def complexity(self) -> int:
+        """Return the number of meaningful AST nodes, a simple parsimony measure."""
+        return sum(
+            1
+            for node in ast.walk(self._compiled())
+            if not isinstance(node, (ast.Expression, ast.operator, ast.unaryop, ast.expr_context))
+        )
+
+    def _compiled(self) -> ast.Expression:
+        cached = getattr(self, "_tree", None)
+        if isinstance(cached, ast.Expression):
+            return cached
+        return self._validate_ast()
 
     def evaluate(
         self,
@@ -127,10 +158,11 @@ class ModelFormula:
         parameter_values: Mapping[str, float],
     ) -> npt.NDArray[np.float64]:
         """Safely evaluate the formula against NumPy data arrays without eval()."""
-        tree = self._validate_ast()
+        tree = self._compiled()
 
         # Build symbol table
         context: dict[str, Any] = dict(_ALLOWED_FUNCTIONS)
+        context.update(_ALLOWED_CONSTANTS)
         for var_name in self.independent_vars:
             if var_name not in variable_values:
                 msg = f"Missing value for independent variable '{var_name}'."
@@ -168,7 +200,8 @@ class ModelFormula:
             raise FormulaEvaluationError(msg)
 
         try:
-            result = _eval_node(tree)
+            with np.errstate(all="ignore"):
+                result = _eval_node(tree)
             return cast(npt.NDArray[np.float64], np.asarray(result, dtype=np.float64))
         except Exception as exc:
             msg = f"Numerical evaluation error in formula '{self.expression}': {exc}"

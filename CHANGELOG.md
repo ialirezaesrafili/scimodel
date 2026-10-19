@@ -1,22 +1,47 @@
 # Changelog
 
-All notable changes to SciModel will be documented here.
+All notable changes to SciModel are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
+[Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## [1.0.0rc1] - 2026-10-19
 
-- Added the initial production-oriented repository structure and project configuration.
-- Added the Phase 1 package boundary modules and version metadata.
-- Added the initial `scimodel --help` and `scimodel --version` CLI behavior.
-- Added unit tests for the CLI boundary and a GitHub Actions quality workflow.
-- Added the project history document.
-- Added Phase 2 CSV inspection, profiling, kinetics validation, JSON output, and integration tests.
-- Added CSV edge-case coverage and recorded the CSV-first input decision in ADR 002.
-- Added the initial Michaelis–Menten solver, fit-result contract, `model fit` CLI command, and known-answer tests.
-- Added explicit Phase 3 solver and CLI failure-case handling tests.
-- Added Phase 4 validation diagnostics, reproducibility manifests, report artifacts, and CLI commands.
-- Added measured coverage reporting with an 85% CI threshold and stronger uncertainty accuracy tests.
-- Added the CLI reference, quick-start workflow, and SciPy-default/MATLAB-deferred backend decision.
-- Added the private pilot protocol and initial pilot report, including performance follow-up findings.
-- Added automated private-pilot regression checks and the resource-target decision record.
-- Added Phase 7 release metadata, issue templates, contributor workflow, citation metadata, and release checklist.
-- Added the release-readiness report and verified the production wheel build/install path.
+First production release candidate: from a single kinetics model to a general scientific
+modeling assistant.
+
+### Added
+
+- Interactive assistant: `scimodel` in a data folder scans files, profiles them, suggests
+  analyses, interprets free-text goals, runs discovery, and writes reports, with novice,
+  intermediate and expert explanation levels.
+- Commands `start`, `scan`, `profile`, `suggest`, `discover`, `config`, `llm`.
+- Multi-format reader (CSV, TSV, delimited text, JSON, Excel, Parquet) with header units,
+  missing-value tokens, comments and decimal commas.
+- Discovery engines: model library (~20 scientific laws), sparse regression (raw and
+  log target), genetic-programming symbolic regression, LLM hypotheses, user formulas.
+- Ranking by search-adjusted AICc with Akaike weights, parsimony guard, and mechanistic
+  tie-break; Pareto front; k-fold cross-validation.
+- Quality assessment (14 checks) with A–D grades and plain-language explanations; NumPy
+  neural-network ceiling.
+- Optional language models: Claude (official SDK, structured outputs, refusal fallback)
+  and local Ollama; profile-only context by default.
+- Discovery report bundle: Markdown, `results.json`, manifest, figures.
+- Go `scimodel-batch`: concurrent, incremental, timeout-aware batch analysis.
+- Bash workflow scripts and CI jobs for Python, Go, shell and an end-to-end smoke test;
+  tag-driven release workflow with cross-compiled binaries.
+- Realistic example datasets with documented ground truth and known-answer benchmarks.
+
+### Changed
+
+- `ScipyFormulaSolver` accepts several independent variables, multi-start initial
+  values, robust losses and Jacobian scaling, and returns parameter correlations.
+- Formula whitelist extended (`expm1`, `log2`, `log1p`, `tan`, `arctan`, `sinh`, `cosh`,
+  `pi`); validated syntax trees are cached.
+- Documentation consolidated into five guides; phase reports and the roadmap were removed
+  (available in git history).
+
+## [0.1.0] - 2026-10-18
+
+- Enzyme-kinetics workflow: CSV inspection, bounded Michaelis–Menten fit, validation,
+  reproducible reports, assistant with audit trail, context, recommendations and
+  evaluation suite, AST-safe formula fitting with an optional MATLAB backend.

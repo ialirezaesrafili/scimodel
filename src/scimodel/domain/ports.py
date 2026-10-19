@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 import numpy.typing as npt
@@ -56,4 +56,33 @@ class FormulaRecommenderPort(Protocol):
         domain_name: str | None = None,
     ) -> Sequence[FormulaRecommendation]:
         """Propose candidate mathematical formulas for the inspected dataset."""
+        ...
+
+
+class LanguageModelError(RuntimeError):
+    """Raised when a language-model provider cannot return a usable answer."""
+
+
+class LanguageModelPort(Protocol):
+    """Port for hosted or local language models used for reasoning, never computation."""
+
+    @property
+    def provider_name(self) -> str:
+        """Stable provider identifier (e.g. 'anthropic', 'ollama')."""
+        ...
+
+    @property
+    def model_name(self) -> str:
+        """Model identifier used for requests."""
+        ...
+
+    def complete(
+        self,
+        system: str,
+        prompt: str,
+        *,
+        json_schema: Mapping[str, Any] | None = None,
+        max_tokens: int = 4096,
+    ) -> str:
+        """Return the model's text answer, JSON-encoded when a schema is given."""
         ...
