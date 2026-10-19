@@ -7,8 +7,8 @@ abstract: >-
   from experimental data (model library, sparse and symbolic regression, optional
   language-model hypotheses), ranks them with search-adjusted information criteria,
   grades their quality, and writes reproducible reports.
-repository-code: https://github.com/REPLACE_WITH_OWNER/scimodel
-url: https://github.com/REPLACE_WITH_OWNER/scimodel
+repository-code: https://github.com/ialirezaesrafili/scimodel
+url: https://github.com/ialirezaesrafili/scimodel
 license: Apache-2.0
 version: 1.0.0rc1
 date-released: 2026-10-19

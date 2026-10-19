@@ -62,7 +62,7 @@ pip install "scimodel[all]"        # core + Claude + plots + Excel
 From source, with the full developer toolchain (Python, Go, Bash):
 
 ```bash
-git clone https://github.com/REPLACE_WITH_OWNER/scimodel && cd scimodel
+git clone https://github.com/ialirezaesrafili/scimodel && cd scimodel
 scripts/setup.sh
 ```
 

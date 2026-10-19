@@ -68,6 +68,5 @@ ADR in `docs/decisions/`.
    and publishes to PyPI through trusted publishing (configure the `pypi` environment
    once).
 
-Before the first public release, replace `REPLACE_WITH_OWNER` in `pyproject.toml`,
-`CITATION.cff`, `.github/CODEOWNERS` and `README.md`. Also confirm that no private data is
-in the history, and that the dataset licences in `examples/README.md` still hold.
+Before the first public release, confirm that no private data is in the history and that
+the dataset licences in `examples/README.md` still hold.

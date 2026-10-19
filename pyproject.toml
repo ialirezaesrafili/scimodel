@@ -46,9 +46,9 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/REPLACE_WITH_OWNER/scimodel/tree/main/docs"
-Issues = "https://github.com/REPLACE_WITH_OWNER/scimodel/issues"
-Repository = "https://github.com/REPLACE_WITH_OWNER/scimodel"
+Documentation = "https://github.com/ialirezaesrafili/scimodel/tree/main/docs"
+Issues = "https://github.com/ialirezaesrafili/scimodel/issues"
+Repository = "https://github.com/ialirezaesrafili/scimodel"
 
 [project.scripts]
 scimodel = "scimodel.interfaces.cli:main"
