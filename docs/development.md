@@ -62,8 +62,13 @@ ADR in `docs/decisions/`.
 
 1. Update `version` in `pyproject.toml` and `src/scimodel/__init__.py`, and add a
    `## [x.y.z]` section to `CHANGELOG.md`.
-2. `scripts/release.sh` (dry run), then `scripts/release.sh --tag`.
-3. `git push origin vX.Y.Z`. `.github/workflows/release.yml` re-runs the gate, builds the
+2. Optional upload rehearsal: in GitHub, **Actions → Release → Run workflow** builds the
+   chosen branch and publishes it to TestPyPI only (environment `testpypi`, with a pending
+   publisher on test.pypi.org: workflow `release.yml`, environment `testpypi`). Check it with
+   `pip install --pre -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ scimodel`.
+   TestPyPI never accepts the same version twice; a repeat run skips the upload.
+3. `scripts/release.sh` (dry run), then `scripts/release.sh --tag`.
+4. `git push origin vX.Y.Z`. `.github/workflows/release.yml` re-runs the gate, builds the
    wheel, sdist and Go binaries, creates the GitHub release (pre-release for `rc`/`b` tags),
    and publishes to PyPI through trusted publishing (configure the `pypi` environment
    once).
