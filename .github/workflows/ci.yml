@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: batch/go.mod
           cache-dependency-path: batch/go.mod
@@ -62,7 +62,7 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: batch/go.mod
       - name: Install
