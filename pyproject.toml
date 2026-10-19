@@ -68,6 +68,8 @@ testpaths = ["tests"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
+# Vendored Claude Code skills (third-party helper scripts) are not project code.
+extend-exclude = [".claude"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
