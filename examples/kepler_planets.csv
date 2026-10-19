@@ -1,0 +1,9 @@
+planet,semi_major_axis [AU],orbital_period [yr],mass [Earth=1]
+Mercury,0.387,0.241,0.0553
+Venus,0.723,0.615,0.815
+Earth,1.000,1.000,1.000
+Mars,1.524,1.881,0.107
+Jupiter,5.203,11.862,317.8
+Saturn,9.537,29.457,95.2
+Uranus,19.191,84.011,14.5
+Neptune,30.069,164.79,17.1

@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATASETS = (
     PROJECT_ROOT / "examples" / "enzyme_kinetics_puromycin.csv",
     PROJECT_ROOT / "examples" / "enzyme_kinetics_synthetic.csv",
+    PROJECT_ROOT / "examples" / "enzyme_kinetics_advanced.csv",
 )
 
 

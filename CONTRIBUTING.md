@@ -1,17 +1,25 @@
 # Contributing to SciModel
 
-SciModel is intended to support careful, reproducible scientific work. Contributions that affect scientific calculations must include tests, explain assumptions, and document limitations.
+SciModel supports careful, reproducible scientific work. Contributions that affect
+scientific results must include known-answer tests and must document their assumptions
+and limitations.
 
-## Before contributing
+## Getting set up
 
-1. Read the [roadmap](docs/SciModel_End_to_End_Project_Roadmap.md) and [architecture guide](docs/ARCHITECTURE.md).
-2. Check existing issues and record significant design decisions as an ADR.
-3. Never commit private laboratory data, credentials, or material without redistribution permission.
+```bash
+scripts/setup.sh        # Python venv + Go batch runner
+scripts/check.sh        # the same gate CI runs
+```
 
-## Development expectations
+Read [Architecture](docs/architecture.md) and [How it works](docs/how-it-works.md) first.
 
-- Keep domain logic independent from the CLI, filesystems, and third-party libraries.
-- Prefer small, explicit interfaces over hidden global state.
-- Add known-answer tests for numerical behavior.
-- Keep transformations and configuration visible in generated reports.
-- Run formatting, linting, type checking, and tests before opening a pull request.
+## Expectations
+
+- Keep `domain/` free of I/O, CLI, SciPy, and network code. Reach technology through ports.
+- Add a known-answer test for numerical behaviour (certified reference or generated ground
+  truth in `examples/generate_examples.py`).
+- Tests must not need a network or a language model; use fake clients.
+- Record long-lived decisions as an ADR in `docs/decisions/`.
+- Update `CHANGELOG.md` under an `Unreleased` heading.
+- Never commit private laboratory data, credentials, or material without redistribution
+  permission.

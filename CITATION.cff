@@ -3,16 +3,20 @@ title: SciModel
 message: "If SciModel contributes to your work, please cite this project."
 type: software
 abstract: >-
-  A transparent and reproducible scientific modeling assistant for moving from
-  experimental data to scientifically justified models.
-repository-code: https://github.com/REPLACE_WITH_OWNER/scimodel
-url: https://github.com/REPLACE_WITH_OWNER/scimodel
+  An open-source scientific modeling assistant that discovers candidate equations
+  from experimental data (model library, sparse and symbolic regression, optional
+  language-model hypotheses), ranks them with search-adjusted information criteria,
+  grades their quality, and writes reproducible reports.
+repository-code: https://github.com/ialirezaesrafili/scimodel
+url: https://github.com/ialirezaesrafili/scimodel
 license: Apache-2.0
-version: 0.1.0-dev
-date-released: 2026-10-18
+version: 1.0.0rc1
+date-released: 2026-10-19
 authors:
   - name: SciModel contributors
 keywords:
   - scientific modeling
-  - enzyme kinetics
+  - equation discovery
+  - symbolic regression
+  - model selection
   - reproducible research
