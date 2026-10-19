@@ -37,7 +37,7 @@ excel = ["openpyxl>=3.1,<4"]
 all = ["scimodel[claude,plots,excel]"]
 dev = [
   "matplotlib>=3.9,<4",
-  "mypy>=1.15,<2",
+  "mypy>=1.15,<3",
   "openpyxl>=3.1,<4",
   "pandas>=2.2,<4",
   "pytest>=8.3,<9",
