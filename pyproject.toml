@@ -31,7 +31,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-claude = ["anthropic>=1.10,<2"]
+claude = ["anthropic>=1.10,<3"]
 plots = ["matplotlib>=3.9,<4"]
 excel = ["openpyxl>=3.1,<4"]
 all = ["scimodel[claude,plots,excel]"]
